@@ -1,0 +1,11 @@
+@font-face {
+    font-family: 'Castego';
+    src: url('/fonts/rubik/Castego.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+
+* {
+  color: black;
+  font-family: Castego;
+}
