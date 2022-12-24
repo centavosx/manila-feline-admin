@@ -1,6 +1,14 @@
 import { Flex, Image, Link as Anchor, FlexProps } from 'rebass'
 import { MobileNavigation, WebNavigation } from '../navigation'
 
+import {
+  useState,
+  useRef,
+  useEffect,
+  forwardRef,
+  RefAttributes,
+  createRef,
+} from 'react'
 import { theme } from '../../utils/theme'
 import { Button } from '../button'
 import { Header } from '../header'
@@ -8,6 +16,102 @@ import { Text } from '../text'
 import { MobileView, WebView } from '../views'
 import { BaseHead } from '../basehead'
 import { useRouter } from 'next/router'
+import { FiMenu } from 'react-icons/fi'
+
+const SideNav = ({
+  isLink,
+  refCurrent,
+}: {
+  isLink?: boolean
+  refCurrent?: Element | null
+}) => {
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+
+  useEffect(() => {
+    if (refCurrent) {
+      refCurrent?.addEventListener('click', () => {
+        setIsOpen(false)
+      })
+      return () => {
+        refCurrent?.removeEventListener('click', () => {
+          setIsOpen(false)
+        })
+      }
+    }
+  }, [refCurrent, setIsOpen])
+
+  return (
+    <Header
+      sx={{
+        gap: 2,
+        alignSelf: 'start',
+        justifyContent: 'start',
+        transition: 'all 0.2s ease-in-out',
+        borderRightWidth: 2,
+        borderRightColor: theme.mainColors.first,
+        borderRightStyle: 'solid',
+      }}
+      flexDirection="column"
+      pt={30}
+      width={isOpen ? 280 : 80}
+      height={'100vh'}
+    >
+      <Flex sx={{ justifyContent: 'center' }}>
+        <Anchor href="/">
+          <Flex alignItems={'center'} sx={{ gap: 2 }}>
+            <Image
+              src={'/assets/logo.png'}
+              width={60}
+              height={60}
+              minWidth={'auto'}
+              alt="image"
+            />
+            {isOpen && (
+              <Text
+                sx={{
+                  fontSize: [0, 0, 18],
+                  fontWeight: 600,
+                  fontFamily: 'Castego',
+                  color: theme.backgroundColors.darkbrown,
+                }}
+              >
+                Manila Feline Center
+              </Text>
+            )}
+          </Flex>
+        </Anchor>
+      </Flex>
+      <Flex alignItems={'center'} width={'100%'}>
+        <Button
+          onClick={() => setIsOpen((d) => !d)}
+          sx={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            minWidth: null,
+          }}
+        >
+          <FiMenu
+            size={30}
+            style={{ alignItems: 'center', justifyContent: 'center' }}
+          />
+        </Button>
+      </Flex>
+      {isOpen && (
+        <Flex
+          sx={{
+            gap: 1,
+            pt: 15,
+            flexDirection: 'column',
+            alignSelf: 'start',
+            width: '100%',
+          }}
+        >
+          <WebNavigation isLink={isLink} />
+        </Flex>
+      )}
+    </Header>
+  )
+}
 
 export const Main = ({
   pageTitle,
@@ -15,6 +119,11 @@ export const Main = ({
   isLink,
 }: { pageTitle?: string; isLink?: boolean } & FlexProps) => {
   const { pathname } = useRouter()
+  const [refValue, setRefvalue] = useState<Element | null>(null)
+  const ref = useRef<Element>(null)
+  useEffect(() => {
+    setRefvalue(ref.current)
+  }, [ref, setRefvalue])
   return (
     <>
       <BaseHead
@@ -23,67 +132,32 @@ export const Main = ({
         description="Set your appointment now"
       />
       <Flex
-        width={'100%'}
-        backgroundColor={theme.colors.verylight}
+        width={'100vw'}
+        backgroundColor={theme.colors.background}
         height={'100vh'}
       >
         <Flex
           flexDirection={'row'}
-          sx={{ position: 'relative' }}
+          sx={{
+            position: 'relative',
+          }}
           alignSelf="start"
           justifyContent={'start'}
+          width={'100vw'}
           backgroundColor={theme.colors.verylight}
         >
           {pathname !== '/' && (
-            <Header
-              sx={{ gap: 2, alignSelf: 'start' }}
-              flexDirection="column"
-              pt={30}
-              width={['auto', 'auto', 300]}
-            >
-              <Flex sx={{ justifyContent: 'start' }}>
-                <Anchor href="/" sx={{ mr: [null, null, 4] }}>
-                  <Flex alignItems={'center'} sx={{ gap: 2 }}>
-                    <Image
-                      src={'/assets/logo.png'}
-                      width={60}
-                      height={60}
-                      minWidth={'auto'}
-                      alt="image"
-                    />
-                    <Text
-                      sx={{
-                        fontSize: [0, 0, 18],
-                        fontWeight: 600,
-                        fontFamily: 'Castego',
-                        color: theme.backgroundColors.darkbrown,
-                        display: ['none', 'none', 'block'],
-                      }}
-                    >
-                      Manila Feline Center
-                    </Text>
-                  </Flex>
-                </Anchor>
-              </Flex>
-              <WebView>
-                <Flex
-                  sx={{
-                    gap: 1,
-                    padding: 15,
-                    flexDirection: 'column',
-                    alignSelf: 'start',
-                    width: '100%',
-                  }}
-                >
-                  <WebNavigation isLink={isLink} />
-                </Flex>
-              </WebView>
-              <MobileView>
-                <MobileNavigation isLink={isLink} />
-              </MobileView>
-            </Header>
+            <SideNav isLink={isLink} refCurrent={refValue} />
           )}
-          <Flex flex={1} height={'100vh'} overflow={'auto'}>
+          <Flex
+            ref={ref}
+            flex={1}
+            height={'100vh'}
+            width={'100%'}
+            overflow={'auto'}
+            flexDirection={'column'}
+            backgroundColor={'white'}
+          >
             {children}
           </Flex>
           {/* <Flex>{children}</Flex>

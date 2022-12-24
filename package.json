@@ -22,6 +22,8 @@
     "eslint-config-next": "13.0.5",
     "formik": "^2.2.9",
     "framer-motion": "^7.6.12",
+    "js-cookie": "^3.0.1",
+    "jwt-decode": "^3.1.2",
     "next": "13.0.5",
     "react": "18.2.0",
     "react-calendar": "^4.0.0",
@@ -35,6 +37,7 @@
     "yup": "^0.32.11"
   },
   "devDependencies": {
+    "@types/js-cookie": "^3.0.2",
     "@types/next": "^9.0.0",
     "@types/node": "^18.11.11",
     "@types/react": "18.0.25",
