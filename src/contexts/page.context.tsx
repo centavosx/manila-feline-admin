@@ -11,7 +11,7 @@ export const PageProvider = ({
 }: {
   children: JSX.Element | JSX.Element[]
 }) => {
-  const { data: user } = useUser()
+  const { user } = useUser()
   const { pathname, replace } = useRouter()
 
   useEffect(() => {

@@ -4,14 +4,13 @@ import { DataContext } from '../contexts'
 import { me } from '../api'
 
 export const useUser = () => {
-  const { data, logout, refetchToken } = useContext(DataContext)
+  const { user, logout } = useContext(DataContext)
 
-  const getMe = async () => {
-    await me()
-    refetchToken()
-  }
+  // const getMe = async () => {
+  //   await me()
+  // }
 
-  getMe()
+  // getMe()
 
-  return { data, logout }
+  return { user, logout }
 }

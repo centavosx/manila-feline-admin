@@ -18,7 +18,7 @@ export const login = async ({
   email: string
   password: string
 }) => {
-  const response = await API.post('/auth', { email, password })
+  const response = await API.post('/user/login', { email, password })
 
   const { accessToken, refreshToken }: TokenDTO = response.data
   localStorage.setItem('accessToken', accessToken)

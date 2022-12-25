@@ -79,11 +79,11 @@ const LinkRef = ({
   )
 }
 
-const navigations = ['Home', 'Services', 'Team', 'About Us', 'Contact Us']
+const navigations = ['Dashboard', 'Doctors', 'Users', 'About Us', 'Contact Us']
 
 export const WebNavigation = ({ isLink }: { isLink?: boolean }) => {
   const { pathname, basePath } = useRouter()
-  console.log(pathname, basePath)
+
   return (
     <>
       {navigations.map((data) => (

@@ -1,7 +1,7 @@
-import { Button as ButtonComponent, ButtonProps } from '@mui/material'
+import { Button as ButtonComponent, ButtonProps as Props } from '@mui/material'
 import styled from '@emotion/styled'
 
-type ButtoncolorProps = {
+export type ButtonProps = {
   backgroundcolor?: string
   activecolor?: string
   hovercolor?: string
@@ -9,13 +9,9 @@ type ButtoncolorProps = {
   hovertextcolor?: string
   activetextcolor?: string
   custom?: any
-}
+} & Props
 
-const StyledButton = ({
-  className,
-  sx,
-  ...props
-}: ButtonProps & ButtoncolorProps) => {
+const StyledButton = ({ className, sx, ...props }: ButtonProps) => {
   return (
     <ButtonComponent className={className} {...props}>
       {props?.children}

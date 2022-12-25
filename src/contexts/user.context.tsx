@@ -2,11 +2,13 @@ import React, { createContext, useCallback, useState, useEffect } from 'react'
 import { User } from '../entities'
 import jwt_decode from 'jwt-decode'
 import Cookies from 'js-cookie'
+import { me } from 'api'
 
 type DataType = {
-  data: User | undefined
-  refetchToken: () => void
-  logout: () => Promise<void>
+  user: User | undefined
+  setUser: React.Dispatch<React.SetStateAction<User | undefined>>
+
+  logout: () => void
 }
 
 export const DataContext = createContext<DataType>({} as DataType)
@@ -16,34 +18,30 @@ export const DataProvider = ({
 }: {
   children: JSX.Element | JSX.Element[]
 }) => {
-  const [token, setToken] = useState<string | null>(
-    typeof window !== 'undefined' ? localStorage?.getItem('accessToken') : null
+  const token =
+    typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+
+  const [user, setUser] = useState<User | undefined>(
+    !!token ? jwt_decode(token) : undefined
   )
-  const user: User | undefined = !!token ? jwt_decode(token) : undefined
-  const data: User | undefined = user
 
-  const refetchToken = () => {
-    setToken(
-      typeof window !== 'undefined'
-        ? localStorage?.getItem('accessToken')
-        : null
-    )
-  }
+  const getMe = useCallback(async () => {
+    setUser(await me())
+  }, [setUser])
 
-  const logout = useCallback(async () => {
-    await new Promise((resolve) => {
-      const cookie = document.cookie.split(';')
-      cookie.forEach((data) => {
-        Cookies.remove(data.split('=')[0].trim())
-      })
-      resolve(localStorage.clear())
-    })
-    refetchToken()
+  useEffect(() => {
+    getMe()
+  }, [getMe])
+
+  const logout = useCallback(() => {
+    Cookies.remove('refreshToken')
+    localStorage.clear()
+    setUser(undefined)
   }, [])
 
   const provider: DataType = {
-    data,
-    refetchToken,
+    user,
+    setUser,
     logout,
   }
 

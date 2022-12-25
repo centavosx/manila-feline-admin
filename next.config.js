@@ -10,6 +10,7 @@ const nextConfig = {
     PROJECT_ROOT: __dirname,
   },
   trailingSlash: true,
+  env: { API: process.env.REACT_APP_API_URL },
 }
 
 module.exports = nextConfig

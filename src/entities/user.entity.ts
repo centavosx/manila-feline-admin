@@ -12,6 +12,7 @@ export type User = {
   id: string
   name: string
   description: string
+  password?: string
   email: string
   position: string
   roles: UserRole[]
