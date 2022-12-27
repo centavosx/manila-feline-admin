@@ -199,7 +199,12 @@ export function CustomTable({
         </TableHead>
         <TableBody>
           {dataRow.map((row, i) => (
-            <TableRow key={i} hover={true} onClick={() => onRowClick?.(row)}>
+            <TableRow
+              key={i}
+              hover={true}
+              onClick={() => onRowClick?.(row)}
+              style={{ cursor: !!onRowClick ? 'pointer' : undefined }}
+            >
               {isCheckboxEnabled && (
                 <TableCell padding="checkbox">
                   <Checkbox

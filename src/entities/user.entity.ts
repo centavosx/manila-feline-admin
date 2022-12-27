@@ -1,4 +1,5 @@
 import { Role } from './role.entity'
+import { Services } from './service.entity'
 
 export type UserRole = {
   id: string
@@ -6,6 +7,12 @@ export type UserRole = {
   roleId: number
   user: User
   role: Role
+}
+
+export type Availability = {
+  id: string
+  startDate: Date
+  endDate: Date
 }
 
 export type User = {
@@ -18,4 +25,6 @@ export type User = {
   roles: UserRole[]
   created: Date
   modified: Date
+  services?: Services[]
+  availability?: Availability[]
 }

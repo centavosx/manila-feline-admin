@@ -4,7 +4,7 @@ import Cookies from 'js-cookie'
 
 export const me = async () => {
   try {
-    const response = await apiAuth.get('/user/me')
+    const response = await apiAuth.get('/user/me/information')
     return response.data
   } catch {
     return undefined

@@ -79,7 +79,7 @@ const LinkRef = ({
   )
 }
 
-const navigations = ['Dashboard', 'Doctors', 'Users', 'About Us', 'Contact Us']
+const navigations = ['Dashboard', 'Doctors', 'Users', 'Services', 'Contact Us']
 
 export const WebNavigation = ({ isLink }: { isLink?: boolean }) => {
   const { pathname, basePath } = useRouter()
@@ -91,12 +91,12 @@ export const WebNavigation = ({ isLink }: { isLink?: boolean }) => {
           key={data}
           href={data?.split(' ').join('').toLowerCase()}
           color={
-            '/' + data?.split(' ').join('').toLowerCase() === pathname
+            pathname.includes(data?.split(' ').join('').toLowerCase())
               ? theme.backgroundColors.verylight
               : theme.backgroundColors.darkbrown
           }
           isLink={isLink}
-          isCurrent={'/' + data?.split(' ').join('').toLowerCase() === pathname}
+          isCurrent={pathname.includes(data?.split(' ').join('').toLowerCase())}
         >
           {data}
         </LinkRef>

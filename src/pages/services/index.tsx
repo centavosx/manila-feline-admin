@@ -1,112 +1,148 @@
-import React from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Flex, Image } from 'rebass'
-import { theme } from '../../utils/theme'
-import { Text } from '../../components/text'
 
-import { Main } from '../../components/main'
-import { Carousel, SecondCarousel } from '../../components/carousel'
-import { Box, BoxContainer } from '../../components/box'
 import { Section } from '../../components/sections'
-import { FormInput } from '../../components/input'
-import { Formik } from 'formik'
-import { Button } from '../../components/button'
-import { FormContainer } from '../../components/forms'
-import { useRouter } from 'next/router'
-import { ServiceIcon } from '../../components/icon'
-import { Collage } from '../../components/collage'
 
-type Services = {
-  name: string
-  src: string
+import { Response as ResponseDto } from 'dto'
+
+import { CustomTable } from 'components/table'
+import { NextPage } from 'next'
+import { useApi } from 'hooks'
+import { useRouter } from 'next/router'
+
+import { ConfirmationModal, ModalFlexProps } from 'components/modal'
+import { FormikValidation } from 'helpers'
+import {
+  addService,
+  deleteService,
+  getAllService,
+  searchService,
+} from 'api/service.api'
+
+type PageProps = NextPage & {
+  limitParams: number
+  pageParams: number
+  searchParams?: string
 }
 
-const services: Services[] = [
-  {
-    name: 'Preventive Care',
-    src: '/assets/services/Preventive Care.png',
+const modalInitial: ModalFlexProps = {
+  isError: true,
+  validationSchema: FormikValidation.createService,
+  modalText: 'Add new service',
+  availableText: 'This user is available',
+  initial: {
+    name: '',
+    description: '',
   },
-  {
-    name: 'Wellness',
-    src: '/assets/services/wellness.png',
-  },
-  {
-    name: 'Consultation',
-    src: '/assets/services/Consultation.png',
-  },
-  {
-    name: 'Nutritional Counseling',
-    src: '/assets/services/nutritional counseling.png',
-  },
-  {
-    name: 'Laboratory',
-    src: '/assets/services/laboratory.png',
-  },
-  {
-    name: 'Surgery',
-    src: '/assets/services/surgery.png',
-  },
-  {
-    name: 'Telemedicine',
-    src: '/assets/services/telemedicine.png',
-  },
-  {
-    name: 'Dental Care',
-    src: '/assets/services/dental care.png',
-  },
-  {
-    name: 'Hospitalization',
-    src: '/assets/services/hospitalization.png',
-  },
-  {
-    name: 'After-hour emergency',
-    src: '/assets/services/afrer hour emergency.png',
-  },
-  {
-    name: 'Pet supplies',
-    src: '/assets/services/pet-supplies.png',
-  },
-]
+  fields: [
+    {
+      field: 'name',
+      label: 'Name',
+      placeHolder: 'Please type name',
+      important: {
+        onSearch: async (val) => {
+          await searchService(val)
+        },
+      },
+    },
+    {
+      field: 'description',
+      label: 'Description',
+      placeHolder: 'Please type description',
+    },
+  ],
+  onSubmit: async (values, { setSubmitting }) => {
+    setSubmitting(true)
 
-const team: { name: string; position: string; img?: string }[] = [
-  {
-    name: 'Ma. Josefina R. De Guzman',
-    position: 'General Manager/ Co Owner',
-    img: '/assets/team/owner.png',
+    try {
+      await addService(values)
+    } finally {
+      setSubmitting(false)
+    }
   },
-  {
-    name: 'Jaymie Rose M. Hayo, DVM',
-    position: 'Practice owner/ lead veterinarian',
-    img: '/assets/team/vet.png',
-  },
-  {
-    name: 'Danica D. Matias, DVM',
-    position: 'Associate Veterinarian',
-    img: '/assets/team/vet2.png',
-  },
-  {
-    name: 'Reymond Macawiwili',
-    position: 'Senior Assistant',
-    img: '/assets/team/assistant.png',
-  },
-  {
-    name: 'Ricvie Mateo',
-    position: 'Assistant',
-    img: '/assets/team/assistant.png',
-  },
-  {
-    name: 'Din Raguindin',
-    position: 'Assistant',
-    img: '/assets/team/assistant.png',
-  },
-]
+}
 
-export default function Dashboard() {
+export default function Services({
+  limitParams,
+  pageParams,
+  searchParams,
+}: PageProps) {
+  const {
+    data: dat,
+    isFetching,
+    refetch,
+  } = useApi(async () => await getAllService(pageParams, limitParams))
+  const { replace, query, pathname } = useRouter()
+  const data: ResponseDto = dat ?? { data: [], total: 0 }
+
+  useEffect(() => {
+    refetch()
+  }, [query, refetch])
+
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
-      <Section
-        title="Welcome Admin"
-        textProps={{ textAlign: 'start' }}
-      ></Section>
+      <Section title="Services" textProps={{ textAlign: 'start' }}>
+        <CustomTable
+          isCheckboxEnabled={true}
+          dataCols={[
+            { field: 'id', name: 'ID' },
+            {
+              field: 'name',
+              name: 'Name',
+            },
+            {
+              field: 'description',
+              name: 'Description',
+            },
+          ]}
+          dataRow={data?.data ?? []}
+          page={pageParams}
+          pageSize={limitParams}
+          total={data?.total ?? 0}
+          rowIdentifierField={'id'}
+          handleChangePage={(_, p) => {
+            replace({
+              pathname,
+              query: {
+                ...query,
+                page: p,
+              },
+            })
+          }}
+          handleChangeRowsPerPage={(e) =>
+            replace({
+              pathname,
+              query: {
+                ...query,
+                page: 0,
+                limit: parseInt(e.target.value),
+              },
+            })
+          }
+        >
+          {(selected, setSelected) => (
+            <ConfirmationModal
+              modalText="Assign Admin"
+              selected={selected}
+              setSelected={setSelected}
+              refetch={refetch}
+              modalCreate={modalInitial}
+              onRemove={async () => {
+                await deleteService({ ids: selected })
+              }}
+            />
+          )}
+        </CustomTable>
+      </Section>
     </Flex>
   )
+}
+export async function getServerSideProps(context: any) {
+  let limitParams: number = Number(context.query.limit) || 20
+  let pageParams: number = Number(context.query.page) || 0
+  let searchParams: string = context.query.search || ''
+
+  return {
+    props: { limitParams, pageParams, searchParams },
+  }
 }

@@ -1,3 +1,4 @@
+import { ReactNode } from 'react'
 import { Flex, FlexProps, TextProps, Text } from 'rebass'
 
 export const Section = ({
@@ -7,7 +8,7 @@ export const Section = ({
   contentProps,
   ...other
 }: {
-  title?: string
+  title?: string | ReactNode
   textProps?: TextProps
   contentProps?: FlexProps
 } & FlexProps) => {

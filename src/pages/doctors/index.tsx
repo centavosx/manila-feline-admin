@@ -1,25 +1,22 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Flex, Image } from 'rebass'
+import React, { useEffect } from 'react'
+import { Flex } from 'rebass'
 
 import { Section } from '../../components/sections'
 
-import { CreateUserDto, Response as ResponseDto } from 'dto'
+import { Response as ResponseDto } from 'dto'
 
-import { getAllUser, getUser, updateRole, deleteRole } from 'api'
+import { deleteRole, getAllUser, getUser, updateRole } from 'api'
+import { FormikValidation } from 'helpers'
 import { CustomTable } from 'components/table'
 import { NextPage } from 'next'
 import { useApi } from 'hooks'
 import { useRouter } from 'next/router'
-import { Button } from 'components/button'
-import ButtonModal from 'components/modal/Modal'
-import { FormInput } from 'components/input'
-import { theme } from 'utils/theme'
-import { FormContainer } from 'components/forms'
-import { Formik } from 'formik'
-import InputAdornment from '@mui/material/InputAdornment'
-import CircularProgress from '@mui/material/CircularProgress'
-import { Text } from 'components/text'
+
 import { Roles } from 'entities'
+import {
+  ModalFlexProps,
+  ConfirmationModal,
+} from 'components/modal/ConfirmModal'
 
 type PageProps = NextPage & {
   limitParams: number
@@ -27,136 +24,61 @@ type PageProps = NextPage & {
   searchParams?: string
 }
 
-const ModalLogin = ({ onSubmit }: { onSubmit: () => void }) => {
-  const [isAvailable, setIsAvailable] = useState(false)
-  const [isSearching, setIsSearching] = useState(false)
-
-  const searchUser = useCallback(
-    async (
-      event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-      onChange: (val: string) => void
-    ) => {
-      if (!isSearching) {
-        setIsSearching(true)
-        getUser(undefined, event.target.value)
-          .then(() => setIsAvailable(true))
-          .catch(() => setIsAvailable(false))
-          .finally(() => setIsSearching(false))
-      }
-      onChange(event.target.value)
+const modalInitial: ModalFlexProps = {
+  validationSchema: FormikValidation.createDoctor,
+  modalText: 'Add new admin',
+  availableText: 'This user is available',
+  initial: {
+    name: '',
+    email: '',
+    password: '',
+    position: '',
+    description: '',
+    role: Roles.DOCTOR,
+  },
+  fields: [
+    {
+      field: 'email',
+      label: 'Email',
+      placeHolder: 'Please type email',
+      important: {
+        onSearch: async (val) => {
+          await getUser(undefined, val)
+        },
+      },
     },
-    [setIsAvailable, setIsSearching, isSearching]
-  )
-
-  return (
-    <Formik<CreateUserDto>
-      initialValues={{ name: '', email: '', password: '' }}
-      onSubmit={async (values, { setSubmitting }) => {
-        try {
-          await updateRole({ ...values, role: Roles.DOCTOR })
-        } finally {
-          setSubmitting(false)
-          onSubmit()
-        }
-      }}
-    >
-      {({ isSubmitting, values, handleChange }) => (
-        <FormContainer
-          label="Assign Doctor"
-          flexProps={{
-            sx: { gap: 10 },
-            justifyContent: 'center',
-            alignItems: 'center',
-            alignSelf: 'center',
-            padding: 20,
-            width: '100%',
-          }}
-        >
-          <Flex
-            sx={{
-              gap: [10],
-              flexDirection: 'column',
-              width: '100%',
-              alignSelf: 'center',
-            }}
-          >
-            <FormInput
-              name="email"
-              label={'Email'}
-              variant="filled"
-              type={'email'}
-              inputcolor={{
-                labelColor: 'gray',
-                backgroundColor: 'white',
-                borderBottomColor: theme.mainColors.first,
-                color: 'black',
-              }}
-              sx={{ color: 'black', width: '100%' }}
-              placeholder="Please type your password"
-              value={values.email}
-              onChange={(e) => searchUser(e, handleChange('email'))}
-              InputProps={{
-                endAdornment: isSearching && (
-                  <InputAdornment position="end">
-                    <CircularProgress size={24} />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            {!isAvailable ? (
-              <>
-                <FormInput
-                  name="name"
-                  label={'Name'}
-                  variant="filled"
-                  inputcolor={{
-                    labelColor: 'gray',
-                    backgroundColor: 'white',
-                    borderBottomColor: theme.mainColors.first,
-                    color: 'black',
-                  }}
-                  sx={{ color: 'black', width: '100%' }}
-                />
-                <FormInput
-                  type={'password'}
-                  name="password"
-                  label={'Password'}
-                  variant="filled"
-                  inputcolor={{
-                    labelColor: 'gray',
-                    backgroundColor: 'white',
-                    borderBottomColor: theme.mainColors.first,
-                    color: 'black',
-                  }}
-                  sx={{ color: 'black', width: '100%' }}
-                  placeholder="Please type your password"
-                />
-              </>
-            ) : (
-              <Text sx={{ color: 'green' }}>This user is available</Text>
-            )}
-          </Flex>
-
-          <Flex width={'100%'} justifyContent={'center'} mt={[10, 20, 30]}>
-            <Button
-              type="submit"
-              backgroundcolor={theme.mainColors.eight}
-              activecolor={theme.colors.verylight}
-              hovercolor={theme.mainColors.second}
-              textcolor={theme.colors.verylight}
-              style={{ width: '200px' }}
-              disabled={isSubmitting || isSearching}
-            >
-              Submit
-            </Button>
-          </Flex>
-        </FormContainer>
-      )}
-    </Formik>
-  )
+    {
+      field: 'name',
+      label: 'Name',
+      placeHolder: 'Please type name',
+    },
+    {
+      field: 'position',
+      label: 'Position',
+      placeHolder: 'Please type position',
+    },
+    {
+      field: 'description',
+      label: 'Description',
+      placeHolder: 'Please type description',
+    },
+    {
+      type: 'password',
+      field: 'password',
+      label: 'Password',
+      placeHolder: 'Please type password',
+    },
+  ],
+  onSubmit: async (values, { setSubmitting }) => {
+    setSubmitting(true)
+    try {
+      await updateRole(values)
+    } finally {
+      setSubmitting(false)
+    }
+  },
 }
-
-export default function Dashboard({
+export default function Doctors({
   limitParams,
   pageParams,
   searchParams,
@@ -169,7 +91,7 @@ export default function Dashboard({
     async () =>
       await getAllUser(pageParams, limitParams, { role: Roles.DOCTOR })
   )
-  const { replace, query, pathname } = useRouter()
+  const { replace, query, pathname, push } = useRouter()
   const data: ResponseDto = dat ?? { data: [], total: 0 }
 
   useEffect(() => {
@@ -224,79 +146,21 @@ export default function Dashboard({
               },
             })
           }
+          onRowClick={(v) =>
+            push({ pathname: '/doctors/[id]', query: { id: v.id } })
+          }
         >
-          {(selected) => (
-            <Flex p={10} alignItems={'end'} width={'100%'} sx={{ gap: 10 }}>
-              <ButtonModal
-                style={{ alignSelf: 'end' }}
-                modalChild={({ onSubmit }) => {
-                  return <ModalLogin onSubmit={onSubmit} />
-                }}
-                onSubmit={refetch}
-              >
-                Add
-              </ButtonModal>
-              {selected.length > 0 && (
-                <ButtonModal
-                  backgroundcolor="red"
-                  textcolor="white"
-                  hovercolor="#B22222"
-                  activecolor="#FF2400"
-                  hovertextcolor="white"
-                  activetextcolor="white"
-                  modalChild={({ onSubmit, setOpen }) => {
-                    return (
-                      <Flex
-                        sx={{ gap: 10 }}
-                        justifyContent={'center'}
-                        alignItems="center"
-                        flexDirection="column"
-                      >
-                        <Text
-                          width={'100%'}
-                          textAlign={'center'}
-                          sx={{
-                            fontSize: 24,
-                            color: 'black',
-                            fontWeight: 'bold',
-                          }}
-                        >
-                          Are you sure?
-                        </Text>
-                        <Flex sx={{ gap: 10 }}>
-                          <Button
-                            style={{ padding: 12 }}
-                            backgroundcolor="red"
-                            textcolor="white"
-                            hovercolor="#B22222"
-                            activecolor="#FF2400"
-                            hovertextcolor="white"
-                            activetextcolor="white"
-                            onClick={() => setOpen(false)}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            style={{ padding: 12 }}
-                            onClick={() => {
-                              deleteRole(
-                                { ids: selected },
-                                Roles.DOCTOR
-                              ).finally(() => onSubmit())
-                            }}
-                          >
-                            Remove
-                          </Button>
-                        </Flex>
-                      </Flex>
-                    )
-                  }}
-                  onSubmit={refetch}
-                >
-                  Remove access
-                </ButtonModal>
-              )}
-            </Flex>
+          {(selected, setSelected) => (
+            <ConfirmationModal
+              modalText="Assign Admin"
+              selected={selected}
+              setSelected={setSelected}
+              refetch={refetch}
+              modalCreate={modalInitial}
+              onRemove={async () => {
+                await deleteRole({ ids: selected }, Roles.DOCTOR)
+              }}
+            />
           )}
         </CustomTable>
       </Section>

@@ -22,7 +22,10 @@ export const Button = styled(StyledButton)`
   && {
     background-color: ${({ backgroundcolor }) => backgroundcolor ?? '#f7efe3'};
     color: ${({ textcolor }) => textcolor ?? '#3f352c'};
-
+    :disabled {
+      background-color: gray;
+      color: white;
+    }
     :hover {
       background-color: ${({ hovercolor }) => hovercolor ?? '#e1d3c2'};
       color: ${({ hovertextcolor }) => hovertextcolor ?? '#3f352c'};

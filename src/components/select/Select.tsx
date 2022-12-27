@@ -1,7 +1,6 @@
 import { CSSProperties, useEffect, useState } from 'react'
 import SelectComponent, { StylesConfig } from 'react-select'
 import { StateManagerProps } from 'react-select/dist/declarations/src/useStateManager'
-import { StyledProps } from 'styled-components'
 
 export interface Option {
   readonly value: string
