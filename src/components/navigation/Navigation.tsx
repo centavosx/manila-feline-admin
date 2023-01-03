@@ -79,7 +79,14 @@ const LinkRef = ({
   )
 }
 
-const navigations = ['Dashboard', 'Doctors', 'Users', 'Services', 'Contact Us']
+const navigations = [
+  'Dashboard',
+  'Appointments',
+  'Doctors',
+  'Users',
+  'Services',
+  'Contact Us',
+]
 
 export const WebNavigation = ({ isLink }: { isLink?: boolean }) => {
   const { pathname, basePath } = useRouter()

@@ -20,8 +20,13 @@ import FirstPageIcon from '@mui/icons-material/FirstPage'
 import KeyboardArrowLeft from '@mui/icons-material/KeyboardArrowLeft'
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight'
 import LastPageIcon from '@mui/icons-material/LastPage'
-import { Checkbox, TableHead } from '@mui/material'
-import { Button } from 'rebass'
+import {
+  Checkbox,
+  MenuItem,
+  OutlinedInput,
+  Select,
+  TableHead,
+} from '@mui/material'
 
 interface TablePaginationActionsProps {
   count: number
@@ -105,7 +110,13 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
 
 type TableProps = {
   dataRow: any[]
-  dataCols: { field: string; name: string; isNumber?: boolean }[]
+  dataCols: {
+    field: string
+    sub?: string
+    name: string
+    isNumber?: boolean
+    items?: { itemValues: string[]; onChange: (v: string) => void }
+  }[]
   isCheckboxEnabled?: boolean
   rowIdentifierField: string
   page: number
@@ -125,6 +136,7 @@ type TableProps = {
         setSelected: Dispatch<SetStateAction<any[]>>
       ) => ReactNode)
     | ReactNode
+    | undefined
 }
 
 export function CustomTable({
@@ -168,7 +180,11 @@ export function CustomTable({
       {typeof children === 'function'
         ? children(selected, setSelected)
         : children}
-      <Table sx={{ minWidth: 500 }} aria-label="custom pagination table">
+      <Table
+        sx={{ minWidth: 500 }}
+        aria-label="custom pagination table"
+        stickyHeader={true}
+      >
         <TableHead>
           <TableRow>
             {isCheckboxEnabled && (
@@ -192,7 +208,40 @@ export function CustomTable({
                 key={head.field}
                 align={head.isNumber ? 'right' : 'left'}
               >
-                {head.name}
+                {!!head.items ? (
+                  <Select
+                    displayEmpty
+                    input={<OutlinedInput />}
+                    renderValue={(selected) => {
+                      if (selected !== null) {
+                        return head.name
+                      }
+
+                      return selected
+                    }}
+                    sx={{
+                      div: {
+                        padding: '2.5px',
+                        borderColor: 'transparent',
+                      },
+                      fieldset: {
+                        border: 0,
+                        borderColor: 'transparent',
+                      },
+                    }}
+                    onChange={(v) =>
+                      head.items?.onChange((v?.target?.value ?? '') as string)
+                    }
+                  >
+                    {head.items.itemValues.map((name) => (
+                      <MenuItem key={name} value={name}>
+                        {name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                ) : (
+                  head.name
+                )}
               </TableCell>
             ))}
           </TableRow>
@@ -221,7 +270,7 @@ export function CustomTable({
               )}
               {dataCols.map((d, k) => (
                 <TableCell key={k} component="th" scope="row">
-                  {row[d.field]}
+                  {!!d.sub ? row[d.field][d.sub] : row[d.field]}
                 </TableCell>
               ))}
             </TableRow>

@@ -27,7 +27,7 @@ export type ModalFlexProps = {
     formikHelpers: FormikHelpers<any>
   ) => void | Promise<any>
 
-  modalText: string
+  modalText?: string
   fields?: InputFieldProp[]
   initial?: any
   availableText?: string
@@ -196,7 +196,7 @@ type Props = {
 
   selected: any[]
   setSelected: Dispatch<SetStateAction<any[]>>
-  modalText: string
+  modalText?: string
 }
 
 export const AreYouSure = ({
@@ -254,28 +254,33 @@ export const ConfirmationModal = ({
 
   selected,
   setSelected,
-  modalCreate: { onSubmit: modalSubmit, ...others },
+  modalCreate,
   onRemove,
-}: Props & { modalCreate: ModalFlexProps; onRemove: () => Promise<void> }) => {
+}: Props & { modalCreate?: ModalFlexProps; onRemove: () => Promise<void> }) => {
+  const { onSubmit: modalSubmit, ...others } = modalCreate ?? {
+    onSubmit: undefined,
+  }
   return (
     <Flex p={10} alignItems={'end'} width={'100%'} sx={{ gap: 10 }}>
-      <ButtonModal
-        style={{ alignSelf: 'end' }}
-        modalChild={({ onSubmit }) => {
-          return (
-            <CreateModalFlex
-              onSubmit={async (values, helpers) => {
-                await modalSubmit?.(values, helpers)
-                onSubmit()
-              }}
-              {...others}
-            />
-          )
-        }}
-        onSubmit={refetch}
-      >
-        Add
-      </ButtonModal>
+      {!!modalCreate && (
+        <ButtonModal
+          style={{ alignSelf: 'end' }}
+          modalChild={({ onSubmit }) => {
+            return (
+              <CreateModalFlex
+                onSubmit={async (values, helpers) => {
+                  await modalSubmit?.(values, helpers)
+                  onSubmit()
+                }}
+                {...others}
+              />
+            )
+          }}
+          onSubmit={refetch}
+        >
+          Add
+        </ButtonModal>
+      )}
       {selected.length > 0 && (
         <ButtonModal
           backgroundcolor="red"
@@ -301,7 +306,7 @@ export const ConfirmationModal = ({
           }}
           onSubmit={refetch}
         >
-          Remove access
+          Remove
         </ButtonModal>
       )}
     </Flex>

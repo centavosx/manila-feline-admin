@@ -1,16 +1,18 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 
 import { Flex, Text } from 'rebass'
 import Box from '@mui/material/Box'
 import OutlinedInput from '@mui/material/OutlinedInput'
 
 import MenuItem from '@mui/material/MenuItem'
-
+import { ListSubheader, InputAdornment } from '@mui/material'
+import SearchIcon from '@mui/icons-material/Search'
 import Select, { SelectChangeEvent } from '@mui/material/Select'
 
 import Chip from '@mui/material/Chip'
 import { Button } from '../../button'
 import { updateAvailability } from 'api'
+import { Input } from 'components/input'
 
 const ITEM_HEIGHT = 50
 const ITEM_PADDING_TOP = 1
@@ -21,6 +23,7 @@ const MenuProps = {
       width: 250,
     },
   },
+  autoFocus: false,
 }
 
 const dateAndTime: string[] = [
@@ -59,6 +62,8 @@ export const SelectTime = ({
   isDisabled: boolean
   onChange: (date: string[]) => void
 }) => {
+  const [searchText, setSearchText] = useState('')
+
   const [timeToSet, setTimeToSet] = useState<string[]>(
     time.length > 0 ? time : ['Select availability time']
   )
@@ -109,6 +114,7 @@ export const SelectTime = ({
       disabled={isDisabled}
       onChange={handleChange}
       input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
+      onClose={() => setSearchText('')}
       renderValue={(selected) =>
         selected.length > 0 ? (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -117,18 +123,42 @@ export const SelectTime = ({
             ))}
           </Box>
         ) : (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, fontStyle:''}}>
             <Chip key={'Select Time'} label={'Select Time'} />
           </Box>
         )
       }
       MenuProps={MenuProps}
     >
-      {dateAndTime.map((dateAndTime) => (
-        <MenuItem key={dateAndTime} value={dateAndTime}>
-          {dateAndTime}
-        </MenuItem>
-      ))}
+      <ListSubheader>
+        <Input
+          placeholder="Search time"
+          padding={0}
+          autoFocus={true}
+          size={'small'}
+          onChange={(e) => setSearchText(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="end">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+          onKeyDown={(e) => {
+            if (e.key !== 'Escape') {
+              e.stopPropagation()
+            }
+          }}
+        />
+      </ListSubheader>
+      {dateAndTime.map(
+        (dateAndTime) =>
+          dateAndTime.toLowerCase().includes(searchText.toLowerCase()) && (
+            <MenuItem key={dateAndTime} value={dateAndTime}>
+              {dateAndTime}
+            </MenuItem>
+          )
+      )}
     </Select>
   )
 }

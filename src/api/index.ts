@@ -1,3 +1,5 @@
 export * from './refresh.api'
 export * from './auth.api'
 export * from './user.api'
+export * from './contact.api'
+export * from './appointment.api'
