@@ -2,7 +2,7 @@
 const nextConfig = {
   assetPrefix:
     process.env.NODE_ENV === 'production'
-      ? 'https://manila-feline.netlify.app'
+      ? 'https://manile-feline-admin.netlify.app'
       : undefined,
   reactStrictMode: true,
   swcMinify: true,
