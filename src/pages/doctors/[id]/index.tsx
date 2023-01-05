@@ -4,6 +4,7 @@ import { useApi } from 'hooks'
 import { BackButton } from 'components/back'
 import { Flex, Text } from 'rebass'
 
+import { format } from 'date-fns'
 import { Availability } from 'components/doctor/availability'
 import { Services } from 'components/doctor/service'
 import { User } from 'entities'
@@ -35,7 +36,17 @@ export default function Information({ id }: { id: string }) {
           </Text>
           <Text>
             <span style={{ fontWeight: 'bold' }}>Created</span>:{' '}
-            {new Date(user?.created ?? 0).toDateString()}
+            {format(
+              new Date(user?.created ?? 0),
+              'EEEE, LLLL do yyyy  hh:mm a'
+            )}
+          </Text>
+          <Text>
+            <span style={{ fontWeight: 'bold' }}>Modified</span>:{' '}
+            {format(
+              new Date(user?.modified ?? 0),
+              'EEEE, LLLL do yyyy  hh:mm a'
+            )}
           </Text>
           <Services id={id} service={user?.services ?? []} refetch={refetch} />
         </Flex>

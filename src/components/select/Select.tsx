@@ -8,8 +8,13 @@ export interface Option {
 }
 
 const colourStyles: StylesConfig<Option> = {
+  container: (styles) => ({
+    ...styles,
+    width: 'auto',
+  }),
   control: (styles) => ({
     ...styles,
+
     backgroundColor: 'green',
     border: '1px solid gray',
     boxShadow: '0 0 0 1px black',

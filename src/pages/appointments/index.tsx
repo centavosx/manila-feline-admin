@@ -82,7 +82,7 @@ const modalInitial: ModalFlexProps = {
   },
 }
 
-export default function Services({
+export default function Appointments({
   limitParams,
   pageParams,
   searchParams,
@@ -96,7 +96,7 @@ export default function Services({
   } = useApi(
     async () => await getAppointment(pageParams, limitParams, status, time)
   )
-  const { replace, query, pathname } = useRouter()
+  const { replace, query, pathname, push } = useRouter()
   const data: ResponseDto = dat ?? { data: [], total: 0 }
 
   useEffect(() => {
@@ -105,7 +105,7 @@ export default function Services({
 
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
-      <Section title="Services" textProps={{ textAlign: 'start' }}>
+      <Section title="Appointments" textProps={{ textAlign: 'start' }}>
         <CustomTable
           isCheckboxEnabled={true}
           dataCols={[
@@ -152,6 +152,9 @@ export default function Services({
               },
             })
           }
+          onRowClick={(d) =>
+            push({ pathname: 'appointments/[id]', query: { id: d.id } })
+          }
         >
           {(selected, setSelected) => (
             <ConfirmationModal
@@ -175,7 +178,7 @@ export async function getServerSideProps(context: any) {
   let pageParams: number = Number(context.query.page) || 0
   let searchParams: string = context.query.search || ''
   let status: Status = context.query.status ?? Status.pending
-  let time: AmOrPm = context.query.time ?? AmOrPm.AM
+  let time: AmOrPm = context.query.time ?? null
 
   return {
     props: { limitParams, pageParams, searchParams, status, time },

@@ -2,7 +2,7 @@ import { CircularProgress, InputAdornment } from '@mui/material'
 
 import { Button } from 'components/button'
 import { FormContainer } from 'components/forms'
-import { FormInput } from 'components/input'
+import { FormInput, SearchableInput } from 'components/input'
 import { Text } from 'components/text'
 
 import { Formik, FormikHelpers, FormikValues } from 'formik'
@@ -49,23 +49,16 @@ export const CreateModalFlex = ({
 
   type Initial = ReturnType<typeof initial>
 
-  const onSearch = useCallback(
-    async (
-      event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-      onChange: (val: string) => void,
-      onChangeValue?: (val: string) => Promise<any>
-    ) => {
+  const onSearch =
+    (onChangeValue?: (val: string) => Promise<any>) => async (val?: string) => {
       if (!isSearching) {
         setIsSearching(true)
-        onChangeValue?.(event.target.value)
+        onChangeValue?.(val ?? '')
           .then(() => setIsAvailable(true))
           .catch(() => setIsAvailable(false))
           .finally(() => setIsSearching(false))
       }
-      onChange(event.target.value)
-    },
-    [setIsAvailable, setIsSearching, isSearching]
-  )
+    }
 
   return (
     <Formik<Initial>
@@ -94,36 +87,46 @@ export const CreateModalFlex = ({
             }}
           >
             {[fields?.find((d) => !!d.important)].map((d, key) => (
-              <FormInput
+              <SearchableInput
                 key={key}
-                name={d?.field!}
                 label={d?.label!}
-                variant="filled"
                 type={d?.type}
-                inputcolor={{
-                  labelColor: 'gray',
-                  backgroundColor: 'white',
-                  borderBottomColor: theme.mainColors.first,
-                  color: 'black',
-                }}
-                sx={{ color: 'black', width: '100%' }}
-                placeholder={d?.placeHolder}
                 value={
                   !!d?.field
                     ? values?.[d.field as unknown as string]
                     : undefined
                 }
-                onChange={(e) =>
-                  onSearch(e, handleChange(d?.field!), d?.important?.onSearch)
+                placeHolder={d?.placeHolder}
+                isSearching={isSearching || isSubmitting}
+                onSearch={async (val) =>
+                  await onSearch(d?.important?.onSearch)(val)
                 }
-                InputProps={{
-                  endAdornment: isSearching && (
-                    <InputAdornment position="end">
-                      <CircularProgress size={24} />
-                    </InputAdornment>
-                  ),
-                }}
+                onChange={(e) => handleChange(d?.field!)(e.target.value)}
               />
+              // <FormInput
+
+              //   variant="filled"
+
+              //   inputcolor={{
+              //     labelColor: 'gray',
+              //     backgroundColor: 'white',
+              //     borderBottomColor: theme.mainColors.first,
+              //     color: 'black',
+              //   }}
+              //   sx={{ color: 'black', width: '100%' }}
+              //   placeholder={d?.placeHolder}
+
+              //   onChange={(e) =>
+
+              //   }
+              //   InputProps={{
+              //     endAdornment: isSearching && (
+              //       <InputAdornment position="end">
+              //         <CircularProgress size={24} />
+              //       </InputAdornment>
+              //     ),
+              //   }}
+              // />
             ))}
 
             {!isAvailable ? (

@@ -30,4 +30,12 @@ export const FormikValidation = {
       .max(50, 'Too Long!')
       .required('Required'),
   }),
+  updateAppointment: Yup.object().shape({
+    startDate: Yup.number()
+      .integer()
+      .lessThan(Yup.ref('endDate'), 'Should be less than end date'),
+    endDate: Yup.number()
+      .integer()
+      .moreThan(Yup.ref('startDate'), 'Should be greater than starting date'),
+  }),
 }

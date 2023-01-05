@@ -27,4 +27,6 @@ export type User = {
   modified: Date
   services?: Services[]
   availability?: Availability[]
+  hasAm?: boolean
+  hasPm?: boolean
 }

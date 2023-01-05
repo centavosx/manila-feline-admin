@@ -24,17 +24,6 @@ apiRefreshAuth.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-apiRefreshAuth.interceptors.response.use(
-  (response) => response,
-  async (error: AxiosError) => {
-    if (error?.response?.status === 401) {
-      Cookies.remove('refreshToken')
-      localStorage.clear()
-    }
-    return Promise.reject(error)
-  }
-)
-
 apiAuth.interceptors.request.use(
   async (config) => {
     config.headers = {
@@ -49,7 +38,14 @@ apiAuth.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     if (error?.response?.status !== 401) return Promise.reject(error)
-    await refreshToken()
-    return apiAuth(error?.config!)
+    return refreshToken()
+      .then(() => apiAuth(error?.config!))
+      .catch((error: AxiosError) => {
+        if (error?.response?.status === 401) {
+          Cookies.remove('refreshToken')
+          localStorage.clear()
+        }
+        return Promise.reject(error)
+      })
   }
 )

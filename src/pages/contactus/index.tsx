@@ -27,7 +27,7 @@ type PageProps = NextPage & {
   searchParams?: string
 }
 
-export default function AdminUsers({
+export default function ContactUs({
   limitParams,
   pageParams,
   searchParams,
