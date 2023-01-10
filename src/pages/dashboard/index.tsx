@@ -106,14 +106,16 @@ function AlignItemsList({ date }: { date: Date }) {
                   secondary={
                     <React.Fragment>
                       <Flex>
-                        <Typography
-                          sx={{ display: 'inline' }}
-                          component="span"
-                          variant="body2"
-                          color="text.primary"
-                        >
-                          {d.doctor.name}
-                        </Typography>
+                        {!!d?.doctor && (
+                          <Typography
+                            sx={{ display: 'inline' }}
+                            component="span"
+                            variant="body2"
+                            color="text.primary"
+                          >
+                            {d?.doctor.name}
+                          </Typography>
+                        )}
                         <Text flex={1}>
                           {` —${
                             d.status !== Status.pending
