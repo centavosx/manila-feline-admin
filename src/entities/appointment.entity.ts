@@ -26,6 +26,8 @@ export type Appointment = {
 
   startDate: Date
 
+  date?: Date
+
   endDate: Date
 
   status: Status

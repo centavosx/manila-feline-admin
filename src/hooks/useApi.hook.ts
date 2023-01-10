@@ -4,7 +4,11 @@ import { Type } from 'typescript'
 
 export const useApi = (api: () => any) => {
   const [data, setData] = useState<any>()
-  const [isFetching, setIsFetching] = useState<boolean>(true)
+
+  const [{ loading, isFetching }, setFetching] = useState<{
+    loading: boolean
+    isFetching: boolean
+  }>({ loading: true, isFetching: true })
   const [error, setError] = useState<any | undefined>(undefined)
 
   const call = useCallback(async () => {
@@ -14,20 +18,21 @@ export const useApi = (api: () => any) => {
     } catch (e) {
       setError(e)
     } finally {
-      setIsFetching(false)
+      setFetching((d) => ({ ...d, isFetching: false }))
     }
-  }, [setData, api, setIsFetching])
+  }, [setData, api, setFetching])
 
   const refetch = useCallback(() => {
-    setIsFetching(true)
-  }, [setIsFetching])
+    setFetching(() => ({ loading: true, isFetching: true }))
+  }, [setFetching])
 
   useEffect(() => {
-    if (isFetching) {
+    if (isFetching && loading) {
+      setFetching((d) => ({ ...d, loading: false }))
       setError(undefined)
       call()
     }
-  }, [isFetching, call, setError])
+  }, [isFetching, loading, call, setError, setFetching])
 
   return { data, isFetching, refetch, error }
 }

@@ -4,7 +4,7 @@ import { apiAuth } from '../util'
 export const getAppointment = async (
   page: number,
   limit: number,
-  status: Status,
+  status?: Status,
   time?: AmOrPm | null,
   other?: any
 ) => {
@@ -25,6 +25,15 @@ export const getAppointmentInfo = async (id: string) => {
   return response
 }
 
+export const deleteAppointment = async (id: string[]) => {
+  const response = await apiAuth.delete('/appointments/', {
+    params: {
+      id,
+    },
+  })
+  return response
+}
+
 export type UpdateAppointmentDto = {
   doctorId?: string
   serviceId?: string
@@ -32,4 +41,18 @@ export type UpdateAppointmentDto = {
   time?: AmOrPm
   startDate?: Date | number
   endDate?: Date | number
+  date?: Date | number
+}
+
+export const updateAppointment = async (
+  id: string,
+  value: UpdateAppointmentDto
+) => {
+  const response = await apiAuth.patch('/appointments/' + id, value)
+  return response
+}
+
+export const newAppointment = async (data: any) => {
+  const response = await apiAuth.post('/appointments/', data)
+  return response
 }

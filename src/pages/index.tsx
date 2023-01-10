@@ -13,6 +13,7 @@ import { Collage } from 'components/collage'
 import * as Yup from 'yup'
 import YupPassword from 'yup-password'
 import { login } from 'api'
+import { useUser } from 'hooks'
 YupPassword(Yup)
 
 type LoginDto = {
@@ -26,7 +27,8 @@ const LoginSchema = Yup.object().shape({
 })
 
 export default function Home() {
-  const { replace } = useRouter()
+  const { refetch } = useUser()
+
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
       <Section
@@ -47,7 +49,7 @@ export default function Home() {
             setSubmitting(true)
             try {
               await login(values)
-              replace('/dashboard')
+              refetch()
             } finally {
               setSubmitting(false)
             }

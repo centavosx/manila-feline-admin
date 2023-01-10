@@ -5,7 +5,7 @@ export const Calendar = styled(CalendarComponent)`
   && {
     padding: 5px;
     width: 100%;
-    height: 100%;
+
     border-radius: 5px;
     border-width: 1px;
     button {

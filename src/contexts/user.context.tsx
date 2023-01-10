@@ -7,7 +7,7 @@ import { me } from 'api'
 type DataType = {
   user: User | undefined
   setUser: React.Dispatch<React.SetStateAction<User | undefined>>
-
+  refetch: () => void
   logout: () => void
 }
 
@@ -31,17 +31,18 @@ export const DataProvider = ({
 
   useEffect(() => {
     getMe()
-  }, [getMe])
+  }, [getMe, token])
 
   const logout = useCallback(() => {
     Cookies.remove('refreshToken')
     localStorage.clear()
     setUser(undefined)
-  }, [])
+  }, [setUser])
 
   const provider: DataType = {
     user,
     setUser,
+    refetch: getMe,
     logout,
   }
 

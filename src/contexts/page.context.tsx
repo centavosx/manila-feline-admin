@@ -12,7 +12,7 @@ export const PageProvider = ({
   children: JSX.Element | JSX.Element[]
 }) => {
   const { user } = useUser()
-  const { pathname, replace } = useRouter()
+  const { pathname, query, replace } = useRouter()
 
   useEffect(() => {
     if (!!user && pathname === '/')
@@ -23,7 +23,7 @@ export const PageProvider = ({
       return () => {
         replace('/')
       }
-  }, [user, pathname, replace])
+  }, [user, pathname, query, replace])
 
   return (
     <DataContext.Provider value={undefined}>

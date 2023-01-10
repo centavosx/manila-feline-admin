@@ -42,7 +42,7 @@ export const FormInput = ({
   )
 }
 
-const InputError = ({ error, sx }: ErrorProp) =>
+export const InputError = ({ error, sx }: ErrorProp) =>
   (error && (
     <Text color={'red'} fontSize={[10, 12]} sx={{ marginTop: '8px', ...sx }}>
       {error}

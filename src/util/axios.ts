@@ -37,15 +37,21 @@ apiAuth.interceptors.request.use(
 apiAuth.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    if (error?.response?.status !== 401) return Promise.reject(error)
-    return refreshToken()
-      .then(() => apiAuth(error?.config!))
-      .catch((error: AxiosError) => {
-        if (error?.response?.status === 401) {
-          Cookies.remove('refreshToken')
-          localStorage.clear()
-        }
-        return Promise.reject(error)
-      })
+    let e = error
+    const config = error.config as any
+    if (e?.response?.status === 401 && !config._retry) {
+      config._retry = true
+      try {
+        await refreshToken()
+        return apiAuth(config)
+      } catch (err) {
+        e = err as AxiosError
+      }
+    }
+    if (e?.response?.status === 401) {
+      Cookies.remove('refreshToken')
+      localStorage.clear()
+    }
+    return Promise.reject(e)
   }
 )

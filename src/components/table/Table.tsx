@@ -27,6 +27,7 @@ import {
   Select,
   TableHead,
 } from '@mui/material'
+import { format } from 'date-fns'
 
 interface TablePaginationActionsProps {
   count: number
@@ -228,6 +229,11 @@ export function CustomTable({
                         border: 0,
                         borderColor: 'transparent',
                       },
+                      fontFamily: '"Roboto","Helvetica","Arial",sans-serif',
+                      fontWeight: 500,
+                      fontSize: '0.875rem',
+                      lineHeight: '1.5rem',
+                      letterSpacing: '0.01071em',
                     }}
                     onChange={(v) =>
                       head.items?.onChange((v?.target?.value ?? '') as string)
@@ -251,7 +257,6 @@ export function CustomTable({
             <TableRow
               key={i}
               hover={true}
-              onClick={() => onRowClick?.(row)}
               style={{ cursor: !!onRowClick ? 'pointer' : undefined }}
             >
               {isCheckboxEnabled && (
@@ -269,8 +274,26 @@ export function CustomTable({
                 </TableCell>
               )}
               {dataCols.map((d, k) => (
-                <TableCell key={k} component="th" scope="row">
-                  {!!d.sub ? row[d.field][d.sub] : row[d.field]}
+                <TableCell
+                  key={k}
+                  component="th"
+                  scope="row"
+                  onClick={() => onRowClick?.(row)}
+                >
+                  {!!d.sub
+                    ? d.sub === 'date'
+                      ? !!row[d.field][d.sub]
+                        ? format(
+                            new Date(row[d.field][d.sub]),
+                            'cccc LLLL d, yyyy'
+                          )
+                        : null
+                      : row[d.field][d.sub]
+                    : d.field === 'date'
+                    ? !!row[d.field]
+                      ? format(new Date(row[d.field]), 'cccc LLLL d, yyyy')
+                      : null
+                    : row[d.field]}
                 </TableCell>
               ))}
             </TableRow>

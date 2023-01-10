@@ -42,7 +42,7 @@ export default function ButtonModal({
       </Button>
       <Modal
         open={open}
-        // onClose={() => setOpen(false)}
+        onClose={() => setOpen(false)}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
         sx={{
@@ -59,12 +59,13 @@ export default function ButtonModal({
             left: '50%',
             transform: 'translate(-50%, -50%)',
             width: ['80%', 450],
+            height: ['100%', 'auto'],
             backgroundColor: 'white',
             border: '1px solid gray',
             borderRadius: '10px',
             boxShadow: 24,
+            overflow: 'auto',
             p: 4,
-
             flexDirection: 'column',
           }}
         >

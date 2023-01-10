@@ -1,10 +1,22 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { getAppointmentInfo, getUser, UpdateAppointmentDto } from '../../../api'
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  Fragment,
+} from 'react'
+import {
+  getAllUser,
+  getAppointmentInfo,
+  getUser,
+  updateAppointment,
+  UpdateAppointmentDto,
+} from '../../../api'
 import { Section } from '../../../components/sections'
 import { useApi } from '../../../hooks'
 import { BackButton } from '../../../components/back'
 import { Option, Select } from '../../../components/select'
-import { FormInput, Input } from '../../../components/input'
+import { FormInput, Input, SearchableInput } from '../../../components/input'
 import { FormContainer } from '../../../components/forms'
 import { Flex, Text } from 'rebass'
 import { Formik, FormikProps } from 'formik'
@@ -16,8 +28,9 @@ import {
   Availability,
   SelectTime,
 } from '../../../components/doctor/availability'
+import { Button } from 'components/button'
 import { Services } from '../../../components/doctor/service'
-import { AmOrPm, Appointment, Status, User } from '../../../entities'
+import { AmOrPm, Appointment, Roles, Status, User } from '../../../entities'
 import dayjs, { Dayjs } from 'dayjs'
 import { DatePicker } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -36,28 +49,29 @@ export default function AppointmentInformation({ id }: { id: string }) {
       doctorId: appointment?.doctor?.id,
       serviceId: appointment?.service?.id,
       status: appointment?.status,
+      time: appointment?.time,
+      date: !!appointment?.date
+        ? new Date(
+            new Date(appointment?.date).toDateString() +
+              ' ' +
+              (appointment.time === AmOrPm.AM ? '12:00 AM' : '12:00 PM')
+          ).getTime()
+        : undefined,
       startDate: !!appointment?.startDate
-        ? appointment.startDate.getTime()
+        ? new Date(appointment.startDate).getTime()
         : undefined,
       endDate: !!appointment?.endDate
-        ? appointment?.endDate.getTime()
+        ? new Date(appointment?.endDate).getTime()
         : undefined,
     })
   }, [edit, appointment])
 
-  useEffect(() => {
-    ref.current?.setValues({
-      doctorId: appointment?.doctor?.id,
-      serviceId: appointment?.service?.id,
-      status: appointment?.status,
-      startDate: !!appointment?.startDate
-        ? appointment.startDate.getTime()
-        : undefined,
-      endDate: !!appointment?.endDate
-        ? appointment?.endDate.getTime()
-        : undefined,
-    })
-  }, [data, appointment])
+  const changeValue = useCallback(
+    (values: Partial<UpdateAppointmentDto>) => {
+      return ref.current?.setValues({ ...ref.current.values, ...values })
+    },
+    [ref]
+  )
 
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
@@ -70,26 +84,69 @@ export default function AppointmentInformation({ id }: { id: string }) {
         contentProps={{
           alignItems: 'start',
           sx: { gap: [20, 40] },
-          flexDirection: ['column', 'row'],
+          flexDirection: ['column'],
         }}
       >
+        <Flex sx={{ gap: 2 }}>
+          <Button
+            backgroundcolor={edit ? 'red' : undefined}
+            textcolor={edit ? 'white' : undefined}
+            hovercolor={edit ? '#B22222' : undefined}
+            activecolor={edit ? '#FF2400' : undefined}
+            hovertextcolor={edit ? 'white' : undefined}
+            activetextcolor={edit ? 'white' : undefined}
+            onClick={() => setEdit((v) => !v)}
+          >
+            {!edit ? 'Edit' : 'Cancel'}
+          </Button>
+          {edit && (
+            <Button
+              onClick={() => ref.current?.submitForm()}
+              disabled={ref.current?.isSubmitting}
+            >
+              Save
+            </Button>
+          )}
+        </Flex>
         <Formik<UpdateAppointmentDto>
           innerRef={ref}
           initialValues={{
             doctorId: appointment?.doctor?.id,
             serviceId: appointment?.service?.id,
             status: appointment?.status,
+            time: appointment?.time,
+            date: !!appointment?.date
+              ? new Date(
+                  new Date(appointment?.date).toDateString() +
+                    ' ' +
+                    (appointment.time === AmOrPm.AM ? '12:00 AM' : '12:00 PM')
+                ).getTime()
+              : undefined,
             startDate: !!appointment?.startDate
-              ? appointment.startDate.getTime()
+              ? new Date(appointment.startDate).getTime()
               : undefined,
             endDate: !!appointment?.endDate
-              ? appointment?.endDate.getTime()
+              ? new Date(appointment?.endDate).getTime()
               : undefined,
           }}
           validationSchema={FormikValidation.updateAppointment}
-          onSubmit={() => {}}
+          onSubmit={(v, { setSubmitting }) => {
+            setSubmitting(true)
+            const newValues: UpdateAppointmentDto = {
+              ...v,
+              startDate: !!v.startDate ? new Date(v.startDate) : undefined,
+              endDate: !!v.endDate ? new Date(v.endDate) : undefined,
+              date: !!v.date ? new Date(v.date) : undefined,
+            }
+            updateAppointment(id, newValues)
+              .then(() => refetch())
+              .finally(() => {
+                setSubmitting(false)
+                setEdit(false)
+              })
+          }}
         >
-          {({ values, errors, setFieldValue }) => (
+          {({ values, errors }) => (
             <FormContainer
               flexProps={{
                 sx: {
@@ -105,7 +162,7 @@ export default function AppointmentInformation({ id }: { id: string }) {
                 <Text sx={{ color: 'gray', mb: 10 }}>
                   Email: {appointment?.email}
                 </Text>
-
+                <Text as={'h3'}>Service: {appointment?.service?.name}</Text>
                 <Text>
                   <span style={{ fontWeight: 'bold' }}>Created</span>:{' '}
                   {format(
@@ -145,7 +202,10 @@ export default function AppointmentInformation({ id }: { id: string }) {
                       { label: 'Accepted', value: Status.accepted },
                       { label: 'Completed', value: Status.completed },
                       { label: 'Cancelled', value: Status.cancelled },
-                    ].find((d) => d.value === appointment?.status)}
+                    ].find((d) => d.value === values?.status)}
+                    onChange={(v) =>
+                      changeValue({ status: (v as Option).value as Status })
+                    }
                     theme={(theme) => ({
                       ...theme,
                       colors: {
@@ -182,7 +242,7 @@ export default function AppointmentInformation({ id }: { id: string }) {
                       ].reduce((prev: Option[], curr: Option) => {
                         if (
                           curr.label === 'Morning' &&
-                          appointment?.doctor.hasAm
+                          appointment?.doctor?.hasAm
                         )
                           return [
                             ...prev,
@@ -190,7 +250,7 @@ export default function AppointmentInformation({ id }: { id: string }) {
                           ]
                         if (
                           curr.label === 'Afternoon' &&
-                          appointment?.doctor.hasPm
+                          appointment?.doctor?.hasPm
                         )
                           return [
                             ...prev,
@@ -198,8 +258,24 @@ export default function AppointmentInformation({ id }: { id: string }) {
                           ]
                         return prev
                       }, [])}
+                      onChange={(v) => {
+                        changeValue({
+                          time: (v as Option).value as AmOrPm,
+                          date: !!values.date
+                            ? new Date(
+                                new Date(values.date).toDateString() +
+                                  ' ' +
+                                  (((v as Option).value as AmOrPm) === AmOrPm.AM
+                                    ? '12:00 AM'
+                                    : '12:00 PM')
+                              ).getTime()
+                            : undefined,
+                          startDate: undefined,
+                          endDate: undefined,
+                        })
+                      }}
                       value={
-                        appointment?.time === AmOrPm.AM
+                        values?.time === AmOrPm.AM
                           ? { label: 'Morning', value: AmOrPm.AM }
                           : { label: 'Afternoon', value: AmOrPm.PM }
                       }
@@ -216,112 +292,93 @@ export default function AppointmentInformation({ id }: { id: string }) {
                     />
                   </Flex>
                   <Flex sx={{ gap: 2, alignItems: 'center', mt: 3 }}>
-                    <Text as={'h4'}>Start Date: </Text>
+                    <Text as={'h4'}>Date: </Text>
                     <SelectDateAndTime
-                      label={'Start Date'}
-                      value={
-                        !!values.startDate
-                          ? new Date(values.startDate)
-                          : undefined
-                      }
-                      onChange={(date) =>
-                        setFieldValue('startDate', date.getTime())
-                      }
+                      label="Date"
+                      value={!!values.date ? new Date(values.date) : undefined}
+                      onChange={(date) => {
+                        changeValue({
+                          date: new Date(
+                            new Date(date).toDateString() +
+                              ' ' +
+                              (values.time === AmOrPm.AM
+                                ? '12:00 AM'
+                                : '12:00 PM')
+                          ).getTime(),
+                          startDate: undefined,
+                          endDate: undefined,
+                        })
+                      }}
                       isDisabled={!edit}
-                      error={errors.startDate}
+                      isDate={true}
                     />
                   </Flex>
-                  <Flex sx={{ gap: 2, alignItems: 'center' }}>
-                    <Text as={'h4'}>End Date: </Text>
-                    <SelectDateAndTime
-                      label="End Date"
-                      value={
-                        !!values.endDate ? new Date(values.endDate) : undefined
-                      }
-                      onChange={(date) =>
-                        setFieldValue('endDate', date.getTime())
-                      }
-                      minDate={
-                        !!values.startDate
-                          ? new Date(values.startDate)
-                          : undefined
-                      }
-                      error={errors.endDate}
-                      isDisabled={!edit}
-                    />
-                  </Flex>
+                  {values.status !== Status.pending && (
+                    <>
+                      <Flex sx={{ gap: 2, alignItems: 'center' }}>
+                        <Text as={'h4'}>Start Time: </Text>
+                        <SelectDateAndTime
+                          label={'Start Date'}
+                          date={appointment?.doctor?.availability?.map((d) => ({
+                            start: new Date(d.startDate),
+                            end: new Date(d.endDate),
+                          }))}
+                          value={
+                            !!values.startDate
+                              ? new Date(values.startDate)
+                              : undefined
+                          }
+                          minDate={
+                            !!values.date ? new Date(values.date) : undefined
+                          }
+                          error={errors.startDate}
+                          onChange={(date) =>
+                            changeValue({
+                              startDate: date.getTime(),
+                            })
+                          }
+                          isDisabled={!edit}
+                        />
+                      </Flex>
+                      <Flex sx={{ gap: 2, alignItems: 'center' }}>
+                        <Text as={'h4'}>End Time: </Text>
+                        <SelectDateAndTime
+                          label="End Date"
+                          value={
+                            !!values.endDate
+                              ? new Date(values.endDate)
+                              : undefined
+                          }
+                          date={appointment?.doctor?.availability?.map((d) => ({
+                            start: new Date(d.startDate),
+                            end: new Date(d.endDate),
+                          }))}
+                          onChange={(date) =>
+                            changeValue({
+                              endDate: date.getTime(),
+                            })
+                          }
+                          minDate={
+                            !!values.startDate
+                              ? new Date(values.startDate)
+                              : undefined
+                          }
+                          error={errors.endDate}
+                          isDisabled={!edit}
+                        />
+                      </Flex>
+                    </>
+                  )}
                 </Flex>
               </Flex>
               <Flex flex={1} flexDirection={'column'} sx={{ gap: 4 }}>
-                <Flex
-                  flexDirection={'row'}
-                  sx={{ alignItems: 'center', gap: 2 }}
-                >
-                  <Text as={'h3'}>Service: </Text>
-                  <Select
-                    isSearchable={true}
-                    name="color"
-                    options={appointment?.doctor?.services?.map((serv) => ({
-                      label: serv.name,
-                      value: serv.id,
-                    }))}
-                    value={
-                      !!values.serviceId
-                        ? ({
-                            label: appointment?.doctor?.services?.find(
-                              (serv) => serv.id === values.serviceId
-                            )?.name,
-                            value: values?.serviceId,
-                          } as Option)
-                        : undefined
-                    }
-                    theme={(theme) => ({
-                      ...theme,
-                      colors: {
-                        ...theme.colors,
-
-                        primary25: '#f7efe3',
-                        primary: '#3f352c',
-                      },
-                    })}
-                    isDisabled={!edit}
-                  />
-                </Flex>
-                <Flex
-                  flexDirection={'row'}
-                  sx={{ alignItems: 'center', gap: 2 }}
-                >
-                  <Text as={'h3'}>Doctor: </Text>
-                  <Select
-                    isSearchable={true}
-                    onInputChange={(v) => console.log(v)}
-                    name="color"
-                    options={appointment?.doctor?.services?.map((serv) => ({
-                      label: serv.name,
-                      value: serv.id,
-                    }))}
-                    value={
-                      !!values.serviceId
-                        ? ({
-                            label: appointment?.doctor?.services?.find(
-                              (serv) => serv.id === values.serviceId
-                            )?.name,
-                            value: values?.serviceId,
-                          } as Option)
-                        : undefined
-                    }
-                    theme={(theme) => ({
-                      ...theme,
-                      colors: {
-                        ...theme.colors,
-
-                        primary25: '#f7efe3',
-                        primary: '#3f352c',
-                      },
-                    })}
-                    isDisabled={!edit}
-                  />
-                </Flex>
+                <GetDoctors
+                  serviceId={appointment?.service?.id}
+                  doctorId={appointment?.doctor?.id}
+                  name={appointment?.doctor?.name}
+                  isEdit={edit}
+                  onChangeDoctor={(v) => changeValue({ doctorId: v })}
+                />
               </Flex>
             </FormContainer>
           )}
@@ -331,6 +388,123 @@ export default function AppointmentInformation({ id }: { id: string }) {
   )
 }
 
+const GetDoctors = ({
+  serviceId,
+  doctorId,
+  name,
+  isEdit,
+  onChangeDoctor,
+}: {
+  serviceId: string
+  doctorId: string
+  name: string
+  isEdit?: boolean
+  onChangeDoctor: (id: string) => void
+}) => {
+  const [selectedData, setSelectedData] = useState<User>()
+  const [data, setData] = useState<User[]>([])
+  const [value, setValue] = useState('')
+  const [page, setPage] = useState(0)
+
+  const searchUser = useCallback(
+    async (value?: string) => {
+      if (!isEdit) return
+      setPage(0)
+      const response = await getAllUser(0, 20, {
+        role: Roles.DOCTOR,
+        search: value,
+        serviceId,
+      })
+      setData(() => response.data.data)
+    },
+    [setData, setPage, serviceId, isEdit]
+  )
+
+  const reset = useCallback(() => {
+    setSelectedData(() => undefined)
+    setData(() => [])
+    setValue(() => '')
+    setPage(() => 0)
+  }, [setData, setSelectedData, setValue, setPage])
+
+  useEffect(() => {
+    if (!isEdit) {
+      reset()
+    } else {
+      searchUser()
+    }
+  }, [isEdit, reset, searchUser])
+
+  const assignUser = useCallback(
+    (user: User) => {
+      onChangeDoctor(user.id)
+      setSelectedData(() => user)
+      setValue(() => '')
+      setData(() => [])
+    },
+    [setSelectedData, setValue, setData, onChangeDoctor]
+  )
+
+  if (!serviceId) return <></>
+
+  return (
+    <Flex sx={{ gap: 2, flexDirection: 'column' }}>
+      <Text as={'h3'}>Doctor</Text>
+      {(!!doctorId || selectedData?.id) && (
+        <>
+          <Text>
+            <span style={{ fontWeight: 'bold' }}>ID: </span>
+            {selectedData?.id ?? doctorId}
+          </Text>
+          <Text>
+            <span style={{ fontWeight: 'bold' }}>Name: </span>
+            {selectedData?.name ?? name}
+          </Text>
+        </>
+      )}
+      <Flex flexDirection={'column'} sx={{ gap: 2, mt: 2 }}>
+        <Text as={'h3'}>Assign Doctor</Text>
+        <SearchableInput
+          onSearch={searchUser}
+          label="Doctor Name"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          disabled={!isEdit}
+        />
+        <Flex flexDirection={'column'}>
+          {data.map(
+            (d, i) =>
+              d.id !== (selectedData?.id ?? doctorId) && (
+                <Flex
+                  key={i}
+                  flexDirection={'row'}
+                  sx={{ gap: 2, alignItems: 'center' }}
+                >
+                  <Text flex={1}>{d.name}</Text>
+                  <Text
+                    as={'a'}
+                    sx={{
+                      textDecoration: 'underline',
+                      color: 'blue',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => assignUser(d)}
+                  >
+                    Assign
+                  </Text>
+                </Flex>
+              )
+          )}
+        </Flex>
+      </Flex>
+    </Flex>
+  )
+}
+
+function pad(d: number) {
+  return d < 10 ? '0' + d.toString() : d.toString()
+}
+
 const SelectDateAndTime = ({
   value,
   label,
@@ -338,54 +512,91 @@ const SelectDateAndTime = ({
   minDate,
   error,
   isDisabled,
+  date,
+  isDate,
 }: {
+  date?: { start: Date; end: Date }[]
   value?: Date
   label: string
   onChange: (date: Date) => void
   minDate?: Date
-  error: string | undefined
+  error?: string | undefined
   isDisabled: boolean
+  isDate?: boolean
 }) => {
-  const today = new Date()
-  today.setDate(today.getDate() + 1)
+  const getMaxTime = (date?: Date) => {
+    if (!date) return new Date()
+    const isAm = date.getHours() < 12 || date.getHours() < 12
+    const d = new Date(date)
+    d.setHours(isAm ? 12 : 23)
+    d.setMinutes(isAm ? 0 : 59)
+    return d
+  }
+
   return (
     <Flex flexDirection={'column'} sx={{ gap: 2 }}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Flex flex={1} sx={{ gap: 2 }}>
-          <DatePicker
-            label={label}
-            onChange={(newValue) => {
-              if (!newValue) return
+          {isDate ? (
+            <DatePicker
+              label={label}
+              onChange={(newValue) => {
+                if (!newValue) return
+                const newDate = new Date(newValue as any)
+                if (value === undefined) return onChange?.(newDate)
+                const nd = new Date(value)
+                nd.setDate(newDate.getDate())
+                nd.setFullYear(newDate.getFullYear())
+                nd.setMonth(newDate.getMonth())
+                return onChange?.(nd)
+              }}
+              value={!!value ? format(value, 'yyyy-MM-dd') : null}
+              renderInput={(params) => <TextField {...params} />}
+              minDate={dayjs(minDate)}
+              disabled={isDisabled}
+            />
+          ) : (
+            <TimePicker
+              label="Time"
+              value={value ?? minDate ?? null}
+              onChange={(newValue) => {
+                const d = new Date(newValue as any)
+                if (!!minDate) {
+                  d.setDate(minDate?.getDate())
+                  d.setMonth(minDate?.getMonth())
+                  d.setFullYear(minDate?.getFullYear())
+                  onChange(d)
+                }
+              }}
+              ampm={true}
+              ampmInClock={false}
+              renderInput={(params) => <TextField {...params} />}
+              minTime={dayjs(minDate)}
+              maxTime={dayjs(getMaxTime(minDate))}
+              shouldDisableTime={(v, c) => {
+                const thisDate = value ?? minDate
+                return !date?.find((d) => {
+                  if (d.start.getDay() === thisDate?.getDay()) {
+                    const date = new Date(
+                      d.start.toDateString() +
+                        ' ' +
+                        (c === 'hours'
+                          ? pad(v) + `:${pad(thisDate.getMinutes())}:00`
+                          : c === 'minutes'
+                          ? pad(thisDate.getHours()) + `:${pad(v)}:00`
+                          : pad(thisDate.getHours()) +
+                            `:${pad(thisDate.getMinutes())}:${pad(v)}`)
+                    )
 
-              const newDate = new Date(newValue as any)
+                    return d.start <= date && date <= d.end
+                  }
 
-              if (value === undefined) return onChange?.(newDate)
-
-              const nd = new Date(value)
-              nd.setDate(newDate.getDate())
-              nd.setFullYear(newDate.getFullYear())
-              nd.setMonth(newDate.getMonth())
-              return onChange?.(nd)
-            }}
-            value={!!value ? format(value, 'yyyy-MM-dd') : null}
-            renderInput={(params) => <TextField {...params} />}
-            minDate={dayjs(minDate ?? today)}
-            disabled={isDisabled}
-          />
-          <TimePicker
-            label="Time"
-            value={value ?? null}
-            onChange={(newValue) => {
-              onChange(new Date(newValue as any))
-            }}
-            renderInput={(params) => <TextField {...params} />}
-            minTime={
-              value?.getDate() === minDate?.getDate()
-                ? dayjs(minDate ?? today)
-                : undefined
-            }
-            disabled={isDisabled || !value}
-          />
+                  return false
+                })
+              }}
+              disabled={false || isDisabled || !minDate}
+            />
+          )}
         </Flex>
       </LocalizationProvider>
       <Text color="red"> {error}</Text>

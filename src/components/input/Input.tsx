@@ -6,7 +6,13 @@ import {
 } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import { de } from 'date-fns/locale'
-import { ChangeEventHandler, useCallback, useEffect, useState } from 'react'
+import {
+  ChangeEventHandler,
+  useCallback,
+  useEffect,
+  useState,
+  ChangeEvent,
+} from 'react'
 import { theme } from 'utils/theme'
 import { FormInput } from './FormInput'
 
@@ -66,30 +72,43 @@ export const SearchableInput = ({
   label,
   type,
   placeHolder,
-  isSearching,
   onSearch,
   onChange,
+  disabled,
 }: {
   key?: any
-
   label?: string
   type?: string
   value?: string
   placeHolder?: string
-  isSearching?: boolean
-
-  onSearch?: (val?: string | undefined) => Promise<void>
-  onChange:
-    | ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
-    | undefined
+  onSearch?: (val: string) => Promise<void>
+  onChange?: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
+  disabled?: boolean
 }) => {
+  const [val, setVal] = useState('')
+  const [isSearching, setIsSearching] = useState<boolean>(false)
+
   useEffect(() => {
+    setIsSearching(true)
     const delay = setTimeout(() => {
-      onSearch?.(value)
+      onSearch?.(val).finally(() => setIsSearching(false))
     }, 500)
     return () => clearTimeout(delay)
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
+  }, [val, setIsSearching])
+
+  useEffect(() => {
+    if (!!value) setVal(() => value)
+  }, [value, setVal])
+
+  const onChangeValue = useCallback(
+    (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+      setVal(e.target.value)
+      onChange?.(e)
+    },
+    [setVal, onChange]
+  )
 
   return (
     <Input
@@ -105,8 +124,8 @@ export const SearchableInput = ({
       }}
       sx={{ color: 'black', width: '100%' }}
       placeholder={placeHolder}
-      onChange={onChange}
-      value={value}
+      onChange={onChangeValue}
+      value={value ?? val}
       InputProps={{
         endAdornment: isSearching && (
           <InputAdornment position="end">
@@ -114,6 +133,7 @@ export const SearchableInput = ({
           </InputAdornment>
         ),
       }}
+      disabled={disabled}
     />
   )
 }

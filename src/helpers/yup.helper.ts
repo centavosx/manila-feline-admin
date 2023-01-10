@@ -38,4 +38,18 @@ export const FormikValidation = {
       .integer()
       .moreThan(Yup.ref('startDate'), 'Should be greater than starting date'),
   }),
+  createAppointment: Yup.object().shape({
+    serviceId: Yup.string().required('Required'),
+    time: Yup.string().required('Required'),
+    date: Yup.string().required('Required'),
+    name: Yup.string()
+      .min(2, 'Too Short!')
+      .max(50, 'Too Long!')
+      .required('Required'),
+    email: Yup.string()
+      .email('Must be an email!')
+      .min(2, 'Too Short!')
+      .max(50, 'Too Long!')
+      .required('Required'),
+  }),
 }

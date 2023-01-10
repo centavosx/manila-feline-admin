@@ -1,12 +1,18 @@
 import { CircularProgress, InputAdornment } from '@mui/material'
-
+import React, { ReactElement } from 'react'
 import { Button } from 'components/button'
 import { FormContainer } from 'components/forms'
 import { FormInput, SearchableInput } from 'components/input'
 import { Text } from 'components/text'
 
 import { Formik, FormikHelpers, FormikValues } from 'formik'
-import { useState, useCallback, Dispatch, SetStateAction } from 'react'
+import {
+  useState,
+  useCallback,
+  Dispatch,
+  SetStateAction,
+  ReactNode,
+} from 'react'
 import { Flex } from 'rebass'
 import { theme } from 'utils/theme'
 import ButtonModal from './Modal'
@@ -14,10 +20,13 @@ import ButtonModal from './Modal'
 type InputFieldProp = {
   field: string
   type?: string
-  label: string
-  placeHolder: string
+  label?: string
+  placeHolder?: string
   important?: {
     onSearch: (val: string) => Promise<any>
+  }
+  custom?: {
+    Jsx: React.FC<any>
   }
 }
 
@@ -76,6 +85,7 @@ export const CreateModalFlex = ({
             alignSelf: 'center',
             padding: 20,
             width: '100%',
+            height: '100%',
           }}
         >
           <Flex
@@ -84,72 +94,57 @@ export const CreateModalFlex = ({
               flexDirection: 'column',
               width: '100%',
               alignSelf: 'center',
+              overflow: 'auto',
             }}
           >
-            {[fields?.find((d) => !!d.important)].map((d, key) => (
-              <SearchableInput
-                key={key}
-                label={d?.label!}
-                type={d?.type}
-                value={
-                  !!d?.field
-                    ? values?.[d.field as unknown as string]
-                    : undefined
-                }
-                placeHolder={d?.placeHolder}
-                isSearching={isSearching || isSubmitting}
-                onSearch={async (val) =>
-                  await onSearch(d?.important?.onSearch)(val)
-                }
-                onChange={(e) => handleChange(d?.field!)(e.target.value)}
-              />
-              // <FormInput
-
-              //   variant="filled"
-
-              //   inputcolor={{
-              //     labelColor: 'gray',
-              //     backgroundColor: 'white',
-              //     borderBottomColor: theme.mainColors.first,
-              //     color: 'black',
-              //   }}
-              //   sx={{ color: 'black', width: '100%' }}
-              //   placeholder={d?.placeHolder}
-
-              //   onChange={(e) =>
-
-              //   }
-              //   InputProps={{
-              //     endAdornment: isSearching && (
-              //       <InputAdornment position="end">
-              //         <CircularProgress size={24} />
-              //       </InputAdornment>
-              //     ),
-              //   }}
-              // />
-            ))}
+            {[fields?.find((d) => !!d.important)].map(
+              (d, key) =>
+                !!d && (
+                  <SearchableInput
+                    key={key}
+                    label={d?.label!}
+                    type={d?.type}
+                    value={
+                      !!d?.field
+                        ? values?.[d.field as unknown as string]
+                        : undefined
+                    }
+                    placeHolder={d?.placeHolder}
+                    onSearch={onSearch(d?.important?.onSearch)}
+                    onChange={(e) => handleChange(d?.field!)(e.target.value)}
+                  />
+                )
+            )}
 
             {!isAvailable ? (
               <>
                 {fields
                   ?.filter((d) => !d.important)
-                  .map((d, i) => (
-                    <FormInput
-                      key={i}
-                      type={d.type}
-                      name={d.field}
-                      label={d.label}
-                      placeholder={d.placeHolder}
-                      variant="filled"
-                      inputcolor={{
-                        labelColor: 'gray',
-                        backgroundColor: 'white',
-                        borderBottomColor: theme.mainColors.first,
-                        color: 'black',
-                      }}
-                      sx={{ color: 'black', width: '100%' }}
-                    />
-                  ))}
+                  .map((d, i) =>
+                    !!d.custom ? (
+                      <d.custom.Jsx
+                        key={i}
+                        onChange={handleChange(d.field)}
+                        error={errors[d.field]}
+                      />
+                    ) : (
+                      <FormInput
+                        key={i}
+                        type={d.type}
+                        name={d.field}
+                        label={d.label}
+                        placeholder={d.placeHolder}
+                        variant="filled"
+                        inputcolor={{
+                          labelColor: 'gray',
+                          backgroundColor: 'white',
+                          borderBottomColor: theme.mainColors.first,
+                          color: 'black',
+                        }}
+                        sx={{ color: 'black', width: '100%' }}
+                      />
+                    )
+                  )}
               </>
             ) : (
               <Text sx={{ color: isError ? 'red' : 'green' }}>
