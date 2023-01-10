@@ -42,7 +42,8 @@ apiAuth.interceptors.response.use(
     if (e?.response?.status === 401 && !config._retry) {
       config._retry = true
       try {
-        await refreshToken()
+        const data = await refreshToken()
+        apiAuth.defaults.headers.common['Authorization'] = data.accessToken
         return apiAuth(config)
       } catch (err) {
         e = err as AxiosError
