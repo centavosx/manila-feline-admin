@@ -71,7 +71,12 @@ export default function Services({
     data: dat,
     isFetching,
     refetch,
-  } = useApi(async () => await getAllService(pageParams, limitParams))
+  } = useApi(
+    async () =>
+      await getAllService(pageParams, limitParams, {
+        search: !!searchParams ? searchParams : undefined,
+      })
+  )
   const { replace, query, pathname } = useRouter()
   const data: ResponseDto = dat ?? { data: [], total: 0 }
 
@@ -106,6 +111,16 @@ export default function Services({
               query: {
                 ...query,
                 page: p,
+              },
+            })
+          }}
+          onSearch={(v) => {
+            replace({
+              pathname,
+              query: {
+                ...query,
+                page: 0,
+                search: v,
               },
             })
           }}

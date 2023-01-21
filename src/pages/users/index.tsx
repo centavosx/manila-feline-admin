@@ -74,7 +74,11 @@ export default function AdminUsers({
     isFetching,
     refetch,
   } = useApi(
-    async () => await getAllUser(pageParams, limitParams, { role: Roles.ADMIN })
+    async () =>
+      await getAllUser(pageParams, limitParams, {
+        role: Roles.ADMIN,
+        search: !!searchParams ? searchParams : undefined,
+      })
   )
   const { replace, query, pathname } = useRouter()
   const data: ResponseDto = dat ?? { data: [], total: 0 }
@@ -110,6 +114,16 @@ export default function AdminUsers({
               query: {
                 ...query,
                 page: p,
+              },
+            })
+          }}
+          onSearch={(v) => {
+            replace({
+              pathname,
+              query: {
+                ...query,
+                page: 0,
+                search: v,
               },
             })
           }}

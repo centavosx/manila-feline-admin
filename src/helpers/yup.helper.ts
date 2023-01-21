@@ -33,10 +33,13 @@ export const FormikValidation = {
   updateAppointment: Yup.object().shape({
     startDate: Yup.number()
       .integer()
-      .lessThan(Yup.ref('endDate'), 'Should be less than end date'),
+      .lessThan(Yup.ref('endDate'), (value) => value.less),
     endDate: Yup.number()
       .integer()
-      .moreThan(Yup.ref('startDate'), 'Should be greater than starting date'),
+      .moreThan(
+        Yup.ref('startDate'),
+        (value) => `Max price must be greater than ` + value.value
+      ),
   }),
   createAppointment: Yup.object().shape({
     serviceId: Yup.string().required('Required'),

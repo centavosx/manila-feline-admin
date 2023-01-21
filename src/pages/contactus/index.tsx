@@ -36,8 +36,13 @@ export default function ContactUs({
     data: dat,
     isFetching,
     refetch,
-  } = useApi(async () => await getAllContact(pageParams, limitParams))
-  const { replace, query, pathname } = useRouter()
+  } = useApi(
+    async () =>
+      await getAllContact(pageParams, limitParams, {
+        search: !!searchParams ? searchParams : undefined,
+      })
+  )
+  const { replace, query, pathname, push } = useRouter()
   const data: ResponseDto = dat ?? { data: [], total: 0 }
 
   useEffect(() => {
@@ -83,6 +88,19 @@ export default function ContactUs({
                 limit: parseInt(e.target.value),
               },
             })
+          }
+          onSearch={(v) => {
+            replace({
+              pathname,
+              query: {
+                ...query,
+                page: 0,
+                search: v,
+              },
+            })
+          }}
+          onRowClick={(v) =>
+            push({ pathname: '/contactus/[id]', query: { id: v.id } })
           }
         >
           {(selected, setSelected) => (

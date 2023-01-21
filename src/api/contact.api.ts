@@ -18,6 +18,18 @@ export const getAllContact = async (
   return response
 }
 
+export const getContact = async (id: string) => {
+  const response = await apiAuth.get('/other/mail/' + id)
+  return response
+}
+
+export const sendMail = async (id: string, message: string) => {
+  const response = await apiAuth.post('/other/mail/' + id + '/reply', {
+    message,
+  })
+  return response
+}
+
 export const deleteMail = async (data: { ids: string[] }) => {
   const response = await apiAuth.patch(`/other/mail`, data)
   return response

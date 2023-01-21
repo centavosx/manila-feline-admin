@@ -1,5 +1,5 @@
 import React, { ReactNode, useCallback, useEffect, useState } from 'react'
-import { Flex, Image } from 'rebass'
+import { Flex } from 'rebass'
 
 import { Section } from '../../components/sections'
 
@@ -12,12 +12,7 @@ import { useRouter } from 'next/router'
 
 import { ConfirmationModal, ModalFlexProps } from 'components/modal'
 import { FormikValidation } from 'helpers'
-import {
-  addService,
-  deleteService,
-  getAllService,
-  searchService,
-} from 'api/service.api'
+import { getAllService } from 'api/service.api'
 import { deleteAppointment, getAppointment, newAppointment } from 'api'
 import { AmOrPm, Services, Status } from 'entities'
 import {
@@ -57,7 +52,6 @@ const SelectHandler = ({
       input={<OutlinedInput />}
       renderValue={(selected: Option | null) => {
         if (!selected) return title
-
         return selected.label
       }}
       sx={{
@@ -223,7 +217,10 @@ export default function Appointments({
     isFetching,
     refetch,
   } = useApi(
-    async () => await getAppointment(pageParams, limitParams, status, time)
+    async () =>
+      await getAppointment(pageParams, limitParams, status, time, {
+        search: !!searchParams ? searchParams : undefined,
+      })
   )
   const { replace, query, pathname, push } = useRouter()
   const data: ResponseDto = dat ?? { data: [], total: 0 }
@@ -238,6 +235,7 @@ export default function Appointments({
         <CustomTable
           isCheckboxEnabled={true}
           dataCols={[
+            { field: 'refId', name: 'Reference ID' },
             {
               field: 'date',
               name: 'Date',
@@ -328,6 +326,16 @@ export default function Appointments({
           onRowClick={(d) =>
             push({ pathname: 'appointments/[id]', query: { id: d.id } })
           }
+          onSearch={(v) => {
+            replace({
+              pathname,
+              query: {
+                ...query,
+                page: 0,
+                search: v,
+              },
+            })
+          }}
         >
           {(selected, setSelected) => (
             <ConfirmationModal

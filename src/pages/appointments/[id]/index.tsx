@@ -24,10 +24,7 @@ import { Formik, FormikProps } from 'formik'
 import { FormikValidation } from '../../../helpers'
 
 import { format } from 'date-fns'
-import {
-  Availability,
-  SelectTime,
-} from '../../../components/doctor/availability'
+
 import { Button } from 'components/button'
 import { Services } from '../../../components/doctor/service'
 import { AmOrPm, Appointment, Roles, Status, User } from '../../../entities'

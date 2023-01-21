@@ -89,7 +89,10 @@ export default function Doctors({
     refetch,
   } = useApi(
     async () =>
-      await getAllUser(pageParams, limitParams, { role: Roles.DOCTOR })
+      await getAllUser(pageParams, limitParams, {
+        role: Roles.DOCTOR,
+        search: !!searchParams ? searchParams : undefined,
+      })
   )
   const { replace, query, pathname, push } = useRouter()
   const data: ResponseDto = dat ?? { data: [], total: 0 }
@@ -143,6 +146,16 @@ export default function Doctors({
                 ...query,
                 page: 0,
                 limit: parseInt(e.target.value),
+              },
+            })
+          }
+          onSearch={(v) =>
+            replace({
+              pathname,
+              query: {
+                ...query,
+                page: 0,
+                search: v,
               },
             })
           }

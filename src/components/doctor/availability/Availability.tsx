@@ -1,165 +1,291 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 
 import { Flex, Text } from 'rebass'
-import Box from '@mui/material/Box'
-import OutlinedInput from '@mui/material/OutlinedInput'
+import { format } from 'date-fns'
 
-import MenuItem from '@mui/material/MenuItem'
-import { ListSubheader, InputAdornment } from '@mui/material'
-import SearchIcon from '@mui/icons-material/Search'
-import Select, { SelectChangeEvent } from '@mui/material/Select'
-
-import Chip from '@mui/material/Chip'
 import { Button } from '../../button'
 import { updateAvailability } from 'api'
-import { Input } from 'components/input'
 
-const ITEM_HEIGHT = 50
-const ITEM_PADDING_TOP = 1
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-  autoFocus: false,
+import {
+  ClockPickerView,
+  LocalizationProvider,
+  TimePicker,
+} from '@mui/x-date-pickers'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import IconButton from '@mui/material/IconButton'
+
+import { FormikValidation } from 'helpers'
+
+import DeleteIcon from '@mui/icons-material/Delete'
+import SaveIcon from '@mui/icons-material/Save'
+import dayjs from 'dayjs'
+import { TextField } from '@mui/material'
+import { start } from 'repl'
+import { Form, Formik } from 'formik'
+import { InputError } from 'components/input'
+
+const setTime = (
+  dateToModify: string | Date,
+  value: number,
+  clock: ClockPickerView
+) => {
+  const date = new Date(dateToModify)
+  if (clock === 'minutes') {
+    date.setMinutes(value)
+  }
+  if (clock === 'hours') {
+    date.setHours(value)
+  }
+  if (clock === 'seconds') {
+    date.setSeconds(value)
+  }
+  return date
 }
 
-const dateAndTime: string[] = [
-  '12:00 AM to 01:00 AM',
-  '01:00 AM to 02:00 AM',
-  '02:00 AM to 03:00 AM',
-  '03:00 AM to 04:00 AM',
-  '04:00 AM to 05:00 AM',
-  '05:00 AM to 06:00 AM',
-  '06:00 AM to 07:00 AM',
-  '07:00 AM to 08:00 AM',
-  '08:00 AM to 09:00 AM',
-  '09:00 AM to 10:00 AM',
-  '10:00 AM to 11:00 AM',
-  '11:00 AM to 12:00 PM',
-  '12:00 PM to 01:00 PM',
-  '01:00 PM to 02:00 PM',
-  '02:00 PM to 03:00 PM',
-  '03:00 PM to 04:00 PM',
-  '04:00 PM to 05:00 PM',
-  '05:00 PM to 06:00 PM',
-  '06:00 PM to 07:00 PM',
-  '07:00 PM to 08:00 PM',
-  '08:00 PM to 09:00 PM',
-  '09:00 PM to 10:00 PM',
-  '10:00 PM to 11:00 PM',
-  '11:00 PM to 11:59 PM',
-]
+const setWholeTime = (
+  dateToModify: Date | string,
+  { h, m, s }: { h: string | number; m: string | number; s: string | number }
+) => {
+  const date = new Date(dateToModify)
+  date.setHours(Number(h))
+  date.setMinutes(Number(m))
+  date.setSeconds(Number(s))
+  return date
+}
+
+export const ExistingTime = ({
+  time,
+  onDelete,
+  isDisabled,
+}: {
+  time: DateProps
+  onDelete: () => void
+  isDisabled: boolean
+}) => {
+  return (
+    <Flex flexDirection={'row'} sx={{ gap: 2, width: '100%', mt: 2 }}>
+      <TimePicker
+        label="Start Time"
+        showToolbar={true}
+        value={time.startDate}
+        closeOnSelect={true}
+        onChange={() => {}}
+        ampm={true}
+        views={['hours', 'minutes']}
+        ampmInClock={false}
+        renderInput={(params) => <TextField {...params} sx={{ flex: 1 }} />}
+        disabled={true}
+      />
+      <TimePicker
+        label="Start Time"
+        showToolbar={true}
+        value={time.endDate}
+        closeOnSelect={true}
+        onChange={() => {}}
+        ampm={true}
+        views={['hours', 'minutes']}
+        ampmInClock={false}
+        renderInput={(params) => <TextField {...params} sx={{ flex: 1 }} />}
+        disabled={true}
+      />
+      {!isDisabled && (
+        <IconButton
+          aria-label="submit"
+          color="error"
+          size={'small'}
+          sx={{ height: 40, width: 40, alignSelf: 'center' }}
+          onClick={onDelete}
+        >
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      )}
+    </Flex>
+  )
+}
+
+export const NewTime = ({
+  timeToSet,
+  onSubmit,
+}: {
+  timeToSet: DateProps[]
+  onSubmit: (value: DateProps) => void
+}) => {
+  const checkDate = useCallback(
+    (date: Date) => {
+      const thisDate = setWholeTime(date, {
+        h: date.getHours(),
+        m: date.getMinutes(),
+        s: date.getSeconds(),
+      })
+
+      return timeToSet?.some((data) => {
+        if (!data.startDate || !data.endDate) return false
+
+        const startTime = setWholeTime(thisDate, {
+          h: data.startDate.getHours(),
+          m: data.startDate.getMinutes(),
+          s: data.startDate.getSeconds(),
+        })
+
+        const endTime = setWholeTime(thisDate, {
+          h: data.endDate.getHours(),
+          m: data.endDate.getMinutes(),
+          s: data.endDate.getSeconds(),
+        })
+
+        return startTime <= thisDate && thisDate <= endTime
+      })
+    },
+    [timeToSet]
+  )
+
+  return (
+    <Formik<{ startDate: number | null; endDate: number | null }>
+      validationSchema={FormikValidation.updateAppointment}
+      initialValues={{ startDate: null, endDate: null }}
+      onSubmit={(values, { setSubmitting }) => {
+        setSubmitting(true)
+        const date: DateProps = {
+          startDate: new Date(values.startDate as unknown as number),
+          endDate: new Date(values.endDate as unknown as number),
+        }
+        onSubmit(date)
+        setSubmitting(false)
+      }}
+    >
+      {({ values, errors, setFieldValue, isSubmitting }) => (
+        <Form>
+          <Flex flexDirection={'row'} sx={{ gap: 2, width: '100%', mt: 2 }}>
+            <Flex flexDirection={'column'} flex={1} sx={{ gap: 2 }}>
+              <TimePicker
+                label="Start Time"
+                showToolbar={true}
+                value={!!values.startDate ? new Date(values.startDate) : null}
+                closeOnSelect={true}
+                onChange={(newValue) => {
+                  if (!newValue) return
+                  const date = new Date(newValue.toString())
+
+                  if (checkDate(date)) return
+                  setFieldValue('startDate', date.getTime())
+                }}
+                ampm={true}
+                views={['hours', 'minutes']}
+                ampmInClock={false}
+                renderInput={(params) => (
+                  <TextField {...params} sx={{ flex: 1 }} />
+                )}
+              />
+              <InputError error={errors.startDate} />
+            </Flex>
+            <Flex flexDirection={'column'} flex={1} sx={{ gap: 2 }}>
+              <TimePicker
+                label="End time"
+                value={!!values.endDate ? new Date(values.endDate) : null}
+                showToolbar={true}
+                views={['hours', 'minutes']}
+                onChange={(newValue) => {
+                  if (!newValue) return
+                  const date = new Date(newValue.toString())
+
+                  if (checkDate(date)) return
+
+                  setFieldValue('endDate', date.getTime())
+                }}
+                ampm={true}
+                ampmInClock={false}
+                renderInput={(params) => (
+                  <TextField {...params} sx={{ flex: 1 }} />
+                )}
+                minTime={dayjs(new Date(values.startDate as unknown as number))}
+                disabled={!values.startDate}
+              />
+              <InputError error={errors.endDate} />
+            </Flex>
+            <IconButton
+              aria-label="submit"
+              color="success"
+              size={'small'}
+              sx={{ height: 40, width: 40, alignSelf: 'center' }}
+              type="submit"
+              disabled={isSubmitting}
+            >
+              <SaveIcon fontSize="small" />
+            </IconButton>
+          </Flex>
+        </Form>
+      )}
+    </Formik>
+  )
+}
 
 export const SelectTime = ({
   time,
   isDisabled,
   onChange,
 }: {
-  time: string[]
+  time: DateProps[]
   isDisabled: boolean
-  onChange: (date: string[]) => void
+  onChange?: (date: DateProps[]) => void
 }) => {
-  const [searchText, setSearchText] = useState('')
+  const [isAdd, setIsAdd] = useState<boolean>(false)
 
-  const [timeToSet, setTimeToSet] = useState<string[]>(
-    time.length > 0 ? time : ['Select availability time']
-  )
-
-  useEffect(() => {
-    setTimeToSet(time.length > 0 ? time : ['Select availability time'])
-  }, [time, setTimeToSet])
-
-  const handleChange = useCallback(
-    (event: SelectChangeEvent<typeof timeToSet>) => {
-      const {
-        target: { value },
-      } = event
-      let data = typeof value === 'string' ? value.split(',') : value
-      const dt = new Date()
-
-      if (value.length === 0) {
-        data = ['Select availability time']
-      } else {
-        data = data.filter((d) => d !== 'Select availability time')
-      }
-
-      data.sort((a, b) => {
-        const split1 = a.split(' to ')
-        const firstTimeA = new Date(
-          dt.toDateString() + ' ' + split1[0]
-        ).getTime()
-
-        const split2 = b.split(' to ')
-        const firstTimeB = new Date(
-          dt.toDateString() + ' ' + split2[0]
-        ).getTime()
-
-        return firstTimeA - firstTimeB
-      })
-
-      setTimeToSet(data)
-      onChange(data.filter((d) => d !== 'Select availability time'))
-    },
-    [setTimeToSet, onChange]
-  )
+  // useEffect(() => {
+  //   onChange?.(timeToSet)
+  // }, [timeToSet, onChange])
 
   return (
-    <Select
-      multiple
-      placeholder="Select time"
-      value={timeToSet}
-      disabled={isDisabled}
-      onChange={handleChange}
-      input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-      onClose={() => setSearchText('')}
-      renderValue={(selected) =>
-        selected.length > 0 ? (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {selected.map((value) => (
-              <Chip key={value} label={value} />
-            ))}
-          </Box>
-        ) : (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, fontStyle:''}}>
-            <Chip key={'Select Time'} label={'Select Time'} />
-          </Box>
-        )
-      }
-      MenuProps={MenuProps}
-    >
-      <ListSubheader>
-        <Input
-          placeholder="Search time"
-          padding={0}
-          autoFocus={true}
-          size={'small'}
-          onChange={(e) => setSearchText(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="end">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-          }}
-          onKeyDown={(e) => {
-            if (e.key !== 'Escape') {
-              e.stopPropagation()
-            }
-          }}
-        />
-      </ListSubheader>
-      {dateAndTime.map(
-        (dateAndTime) =>
-          dateAndTime.toLowerCase().includes(searchText.toLowerCase()) && (
-            <MenuItem key={dateAndTime} value={dateAndTime}>
-              {dateAndTime}
-            </MenuItem>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Flex flexDirection={'column'} width={'100%'} sx={{ gap: 2 }}>
+        {time.map((d, i) => {
+          return (
+            <ExistingTime
+              key={JSON.stringify(d) + i}
+              time={d}
+              onDelete={() =>
+                onChange?.(
+                  time.filter(
+                    (toDelete) => JSON.stringify(toDelete) !== JSON.stringify(d)
+                  )
+                )
+              }
+              isDisabled={isDisabled}
+            />
           )
-      )}
-    </Select>
+        })}
+        {(time.length === 0 || isAdd) && !isDisabled && (
+          <NewTime
+            timeToSet={time}
+            onSubmit={(value) => {
+              onChange?.([...time, value])
+              setIsAdd(false)
+            }}
+          />
+        )}
+        {time.length > 0 && !isDisabled && (
+          <Flex>
+            {!isAdd ? (
+              <Button style={{ padding: 12 }} onClick={() => setIsAdd(true)}>
+                Add New Time
+              </Button>
+            ) : (
+              <Button
+                style={{ padding: 12 }}
+                backgroundcolor="red"
+                textcolor="white"
+                hovercolor="#B22222"
+                activecolor="#FF2400"
+                hovertextcolor="white"
+                activetextcolor="white"
+                onClick={() => setIsAdd(false)}
+              >
+                Cancel
+              </Button>
+            )}
+          </Flex>
+        )}
+      </Flex>
+    </LocalizationProvider>
   )
 }
 
@@ -174,18 +300,18 @@ const days = [
 ]
 
 type DateProps = {
-  startDate: Date
-  endDate: Date
+  startDate: Date | null
+  endDate: Date | null
 }
 
 export type TimeSetterProps = [
-  string[],
-  string[],
-  string[],
-  string[],
-  string[],
-  string[],
-  string[]
+  DateProps[],
+  DateProps[],
+  DateProps[],
+  DateProps[],
+  DateProps[],
+  DateProps[],
+  DateProps[]
 ]
 
 export const Availability = ({
@@ -221,19 +347,11 @@ export const Availability = ({
     (date: DateProps[]) => {
       let newTime: TimeSetterProps = [[], [], [], [], [], [], []]
       date?.forEach((d) => {
+        if (!d.startDate || !d.endDate) return
         const startDt = new Date(d.startDate)
         const endDt = new Date(d.endDate)
         const day = startDt.getDay()
-        const startAndEnd = `${startDt.toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true,
-        })} to ${endDt.toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true,
-        })}`
-        newTime[day] = [...newTime[day], startAndEnd]
+        newTime[day] = [...newTime[day], { startDate: startDt, endDate: endDt }]
       })
       setTimeToPass(newTime)
       setTime(newTime)
@@ -281,7 +399,9 @@ export const Availability = ({
       </Flex>
       {days.map((day, i) => (
         <Flex key={i} flexDirection={'column'} sx={{ gap: 2 }}>
-          <Text as={'h4'}>{day}</Text>
+          {(timeToPass?.[i].length > 0 || isEdit) && (
+            <Text as={'h4'}>{day}</Text>
+          )}
 
           <SelectTime
             isDisabled={!isEdit}

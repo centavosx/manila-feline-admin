@@ -28,6 +28,9 @@ import {
   TableHead,
 } from '@mui/material'
 import { format } from 'date-fns'
+import { Flex } from 'rebass'
+import { Input } from 'components/input'
+import { Button } from 'components/button'
 
 interface TablePaginationActionsProps {
   count: number
@@ -140,6 +143,30 @@ type TableProps = {
     | undefined
 }
 
+const SearchInputField = ({ onSearch }: { onSearch?: (v: string) => void }) => {
+  const [search, setSearch] = useState<string>('')
+  return (
+    <Flex
+      p={10}
+      alignItems={'end'}
+      width={'100%'}
+      sx={{ gap: 10, alignItems: 'center', justifyContent: 'center' }}
+    >
+      <Input
+        placeholder="Search..."
+        value={search}
+        sx={{
+          input: {
+            padding: 1,
+          },
+        }}
+        onChange={(e) => setSearch(() => e.target.value)}
+      />
+      <Button onClick={() => onSearch?.(search)}>Search</Button>
+    </Flex>
+  )
+}
+
 export function CustomTable({
   dataRow,
   dataCols,
@@ -151,8 +178,9 @@ export function CustomTable({
   handleChangeRowsPerPage,
   handleChangePage,
   onRowClick,
+  onSearch,
   children,
-}: TableProps) {
+}: TableProps & { onSearch?: (v: string) => void }) {
   const [selected, setSelected] = useState<any[]>([])
 
   const handleSelectAllClick = useCallback(
@@ -181,6 +209,7 @@ export function CustomTable({
       {typeof children === 'function'
         ? children(selected, setSelected)
         : children}
+      <SearchInputField onSearch={onSearch} />
       <Table
         sx={{ minWidth: 500 }}
         aria-label="custom pagination table"
@@ -282,13 +311,13 @@ export function CustomTable({
                 >
                   {!!d.sub
                     ? d.sub === 'date'
-                      ? !!row[d.field][d.sub]
+                      ? !!row[d.field]?.[d.sub]
                         ? format(
-                            new Date(row[d.field][d.sub]),
+                            new Date(row[d.field]?.[d.sub]),
                             'cccc LLLL d, yyyy'
                           )
                         : null
-                      : row[d.field][d.sub]
+                      : row[d.field]?.[d.sub]
                     : d.field === 'date'
                     ? !!row[d.field]
                       ? format(new Date(row[d.field]), 'cccc LLLL d, yyyy')
