@@ -127,7 +127,7 @@ export const Main = ({
   return (
     <>
       <BaseHead
-        title="Appointment"
+        title="Manila Feline Admin"
         pageTitle={pageTitle}
         description="Set your appointment now"
       />
