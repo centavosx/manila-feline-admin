@@ -214,7 +214,7 @@ export function CustomTable({
         : children}
       <SearchInputField onSearch={onSearch} />
       <Table
-        sx={{ minWidth: 500 }}
+        sx={{ minWidth: 500, position: 'relative' }}
         aria-label="custom pagination table"
         stickyHeader={true}
       >
@@ -284,56 +284,52 @@ export function CustomTable({
             ))}
           </TableRow>
         </TableHead>
-        <TableBody style={{ position: 'relative' }}>
-          {isFetching ? (
-            <Loading />
-          ) : (
-            dataRow.map((row, i) => (
-              <TableRow
-                key={i}
-                hover={true}
-                style={{ cursor: !!onRowClick ? 'pointer' : undefined }}
-              >
-                {isCheckboxEnabled && (
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      color="primary"
-                      checked={selected.includes(row[rowIdentifierField])}
-                      onChange={(e) =>
-                        handleCheckClick(e, row[rowIdentifierField])
-                      }
-                      inputProps={{
-                        'aria-label': 'select all desserts',
-                      }}
-                    />
-                  </TableCell>
-                )}
-                {dataCols.map((d, k) => (
-                  <TableCell
-                    key={k}
-                    component="th"
-                    scope="row"
-                    onClick={() => onRowClick?.(row)}
-                  >
-                    {!!d.sub
-                      ? d.sub === 'date'
-                        ? !!row[d.field]?.[d.sub]
-                          ? format(
-                              new Date(row[d.field]?.[d.sub]),
-                              'cccc LLLL d, yyyy'
-                            )
-                          : null
-                        : row[d.field]?.[d.sub]
-                      : d.field === 'date'
-                      ? !!row[d.field]
-                        ? format(new Date(row[d.field]), 'cccc LLLL d, yyyy')
+        <TableBody>
+          {dataRow.map((row, i) => (
+            <TableRow
+              key={i}
+              hover={true}
+              style={{ cursor: !!onRowClick ? 'pointer' : undefined }}
+            >
+              {isCheckboxEnabled && (
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    color="primary"
+                    checked={selected.includes(row[rowIdentifierField])}
+                    onChange={(e) =>
+                      handleCheckClick(e, row[rowIdentifierField])
+                    }
+                    inputProps={{
+                      'aria-label': 'select all desserts',
+                    }}
+                  />
+                </TableCell>
+              )}
+              {dataCols.map((d, k) => (
+                <TableCell
+                  key={k}
+                  component="th"
+                  scope="row"
+                  onClick={() => onRowClick?.(row)}
+                >
+                  {!!d.sub
+                    ? d.sub === 'date'
+                      ? !!row[d.field]?.[d.sub]
+                        ? format(
+                            new Date(row[d.field]?.[d.sub]),
+                            'cccc LLLL d, yyyy'
+                          )
                         : null
-                      : row[d.field]}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          )}
+                      : row[d.field]?.[d.sub]
+                    : d.field === 'date'
+                    ? !!row[d.field]
+                      ? format(new Date(row[d.field]), 'cccc LLLL d, yyyy')
+                      : null
+                    : row[d.field]}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
         </TableBody>
         <TableFooter>
           <TableRow>
@@ -354,6 +350,7 @@ export function CustomTable({
             />
           </TableRow>
         </TableFooter>
+        {isFetching && <Loading />}
       </Table>
     </TableContainer>
   )

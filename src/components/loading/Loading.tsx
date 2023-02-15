@@ -10,7 +10,7 @@ export const Loading = () => {
         left: 0,
         zIndex: 100000,
         backgroundColor: 'rgba(0,0,0,0.5)',
-        paddingTop: '50%',
+        paddingTop: '25%',
         paddingLeft: '50%',
         height: '100%',
         width: '100%',
