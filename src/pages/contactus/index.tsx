@@ -18,7 +18,6 @@ import { NextPage } from 'next'
 import { useApi } from 'hooks'
 import { useRouter } from 'next/router'
 
-import { Roles } from 'entities'
 import { ConfirmationModal, ModalFlexProps } from 'components/modal'
 
 type PageProps = NextPage & {
@@ -51,7 +50,11 @@ export default function ContactUs({
 
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
-      <Section title="Contact Us" textProps={{ textAlign: 'start' }}>
+      <Section
+        title="Contact Us"
+        textProps={{ textAlign: 'start' }}
+        isFetching={isFetching}
+      >
         <CustomTable
           isCheckboxEnabled={true}
           dataCols={[

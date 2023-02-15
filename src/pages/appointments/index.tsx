@@ -82,7 +82,7 @@ const ServicesComp: React.FC<{
   const { data: dat } = useApi(async () => await getAllService(0, 20))
   const data: ResponseDto = dat ?? { data: [], total: 0 }
   const services: Services[] = data.data
-  console.log(error)
+
   return (
     <Flex sx={{ gap: 1, flexDirection: 'column' }}>
       <SelectHandler onChange={onChange} title="Service">
@@ -231,7 +231,11 @@ export default function Appointments({
 
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
-      <Section title="Appointments" textProps={{ textAlign: 'start' }}>
+      <Section
+        title="Appointments"
+        textProps={{ textAlign: 'start' }}
+        isFetching={isFetching}
+      >
         <CustomTable
           isCheckboxEnabled={true}
           dataCols={[

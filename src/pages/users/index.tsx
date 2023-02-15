@@ -69,7 +69,11 @@ export default function AdminUsers({
   pageParams,
   searchParams,
 }: PageProps) {
-  const { data: dat, refetch } = useApi(
+  const {
+    data: dat,
+    refetch,
+    isFetching,
+  } = useApi(
     async () =>
       await getAllUser(pageParams, limitParams, {
         role: Roles.ADMIN,
@@ -85,7 +89,11 @@ export default function AdminUsers({
 
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
-      <Section title="Admin Users" textProps={{ textAlign: 'start' }}>
+      <Section
+        title="Admin Users"
+        textProps={{ textAlign: 'start' }}
+        isFetching={isFetching}
+      >
         <CustomTable
           isCheckboxEnabled={true}
           dataCols={[

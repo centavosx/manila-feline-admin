@@ -1,14 +1,7 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  Fragment,
-} from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import {
   getAllUser,
   getAppointmentInfo,
-  getUser,
   updateAppointment,
   UpdateAppointmentDto,
 } from '../../../api'
@@ -16,7 +9,7 @@ import { Section } from '../../../components/sections'
 import { useApi } from '../../../hooks'
 import { BackButton } from '../../../components/back'
 import { Option, Select } from '../../../components/select'
-import { FormInput, Input, SearchableInput } from '../../../components/input'
+import { SearchableInput } from '../../../components/input'
 import { FormContainer } from '../../../components/forms'
 import { Flex, Text } from 'rebass'
 import { Formik, FormikProps } from 'formik'
@@ -26,9 +19,9 @@ import { FormikValidation } from '../../../helpers'
 import { format } from 'date-fns'
 
 import { Button } from 'components/button'
-import { Services } from '../../../components/doctor/service'
+
 import { AmOrPm, Appointment, Roles, Status, User } from '../../../entities'
-import dayjs, { Dayjs } from 'dayjs'
+import dayjs from 'dayjs'
 import { DatePicker } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
@@ -37,7 +30,9 @@ import { TextField } from '@mui/material'
 
 export default function AppointmentInformation({ id }: { id: string }) {
   const ref = useRef<FormikProps<UpdateAppointmentDto>>(null)
-  const { data, refetch } = useApi(async () => await getAppointmentInfo(id))
+  const { data, refetch, isFetching } = useApi(
+    async () => await getAppointmentInfo(id)
+  )
   const [edit, setEdit] = useState<boolean>(false)
   const appointment: Appointment = data
 
@@ -83,6 +78,7 @@ export default function AppointmentInformation({ id }: { id: string }) {
           sx: { gap: [20, 40] },
           flexDirection: ['column'],
         }}
+        isFetching={isFetching}
       >
         <Flex sx={{ gap: 2 }}>
           <Button

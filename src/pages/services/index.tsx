@@ -86,7 +86,11 @@ export default function Services({
 
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
-      <Section title="Services" textProps={{ textAlign: 'start' }}>
+      <Section
+        title="Services"
+        textProps={{ textAlign: 'start' }}
+        isFetching={isFetching}
+      >
         <CustomTable
           isCheckboxEnabled={true}
           dataCols={[

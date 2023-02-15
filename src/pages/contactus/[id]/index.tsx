@@ -108,8 +108,8 @@ const AllReplies = ({
 }
 
 export default function ContactInformation({ id }: { id: string }) {
-  const { data, refetch } = useApi(async () => await getContact(id))
-  const [edit, setEdit] = useState<boolean>(false)
+  const { data, refetch, isFetching } = useApi(async () => await getContact(id))
+
   const contact: ContactUs = data
 
   return (
@@ -124,6 +124,7 @@ export default function ContactInformation({ id }: { id: string }) {
           sx: { gap: [20, 40] },
           flexDirection: ['column', 'row'],
         }}
+        isFetching={isFetching}
       >
         <Flex flexDirection={'column'} flex={1} sx={{ gap: 2 }}>
           <Text as={'h2'}>Subject: {contact?.message}</Text>
