@@ -10,6 +10,7 @@ import { useState, useCallback, Dispatch, SetStateAction } from 'react'
 import { Flex } from 'rebass'
 import { theme } from 'utils/theme'
 import ButtonModal from './Modal'
+import { Loading } from 'components/loading'
 
 type InputFieldProp = {
   field: string
@@ -90,6 +91,7 @@ export const CreateModalFlex = ({
             height: '100%',
           }}
         >
+          {isSubmitting && <Loading />}
           <Flex
             sx={{
               gap: [10],
