@@ -17,14 +17,14 @@ export const PageProvider = ({
   console.log(user, pathname)
 
   useEffect(() => {
-    if (!!user && pathname === '/')
-      return () => {
-        replace('/dashboard')
-      }
-    if (!user && pathname !== '/')
-      return () => {
-        replace('/')
-      }
+    if (!!user && pathname === '/') {
+      replace('/dashboard')
+      return
+    }
+    if (!user && pathname !== '/') {
+      replace('/')
+      return
+    }
   }, [user, pathname, query, replace])
 
   return (
