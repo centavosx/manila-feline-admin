@@ -32,7 +32,7 @@ export const useApi = (api: () => any) => {
       setError(undefined)
       call()
     }
-  }, [isFetching, loading, call, setError, setFetching])
+  }, [isFetching, loading])
 
   return { data, isFetching, refetch, error }
 }

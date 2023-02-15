@@ -69,11 +69,7 @@ export default function AdminUsers({
   pageParams,
   searchParams,
 }: PageProps) {
-  const {
-    data: dat,
-    isFetching,
-    refetch,
-  } = useApi(
+  const { data: dat, refetch } = useApi(
     async () =>
       await getAllUser(pageParams, limitParams, {
         role: Roles.ADMIN,
