@@ -14,6 +14,8 @@ export const PageProvider = ({
   const { user } = useUser()
   const { pathname, query, replace } = useRouter()
 
+  console.log(user, pathname)
+
   useEffect(() => {
     if (!!user && pathname === '/')
       return () => {
