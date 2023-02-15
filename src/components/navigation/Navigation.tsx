@@ -1,5 +1,4 @@
 import { Link, scroller } from 'react-scroll'
-import NextLink from 'next/link'
 import { TextProps } from 'rebass'
 import { theme } from '../../utils/theme'
 import { Text } from '../text'
@@ -24,6 +23,7 @@ const LinkRef = ({
   isCurrent,
   ...others
 }: { href: string; isLink?: boolean; isCurrent: boolean } & TextProps) => {
+  const { push } = useRouter()
   return !isLink ? (
     <Link
       to={href}
@@ -55,28 +55,28 @@ const LinkRef = ({
       </Text>
     </Link>
   ) : (
-    <NextLink href={'/' + href} style={{ cursor: 'pointer' }}>
-      <Text
-        width={'auto'}
-        fontWeight={'bold'}
-        sx={{
-          fontSize: [14, 16],
-          fontFamily: 'Castego',
-          borderRadius: 8,
-          backgroundColor: isCurrent ? theme.mainColors.first : undefined,
-          padding: 14,
-          ':hover': {
-            backgroundColor: theme.mainColors.fifth,
-          },
-          '&&:active': {
-            backgroundColor: theme.mainColors.sixth,
-          },
-        }}
-        {...others}
-      >
-        {children}
-      </Text>
-    </NextLink>
+    <Text
+      width={'auto'}
+      fontWeight={'bold'}
+      sx={{
+        fontSize: [14, 16],
+        fontFamily: 'Castego',
+        borderRadius: 8,
+        cursor: 'pointer',
+        backgroundColor: isCurrent ? theme.mainColors.first : undefined,
+        padding: 14,
+        ':hover': {
+          backgroundColor: theme.mainColors.fifth,
+        },
+        '&&:active': {
+          backgroundColor: theme.mainColors.sixth,
+        },
+      }}
+      onClick={() => push({ pathname: href })}
+      {...others}
+    >
+      {children}
+    </Text>
   )
 }
 
@@ -90,7 +90,7 @@ const navigations = [
 ]
 
 export const WebNavigation = ({ isLink }: { isLink?: boolean }) => {
-  const { pathname, basePath } = useRouter()
+  const { pathname } = useRouter()
   const { logout } = useUser()
 
   return (
