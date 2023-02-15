@@ -119,6 +119,7 @@ export const WebNavigation = ({ isLink }: { isLink?: boolean }) => {
           borderRadius: 8,
           padding: 14,
           cursor: 'pointer',
+          color: theme.backgroundColors.darkbrown,
           ':hover': {
             backgroundColor: theme.mainColors.fifth,
           },
