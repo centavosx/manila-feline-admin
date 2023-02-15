@@ -36,22 +36,18 @@ export const Section = ({
           {title}
         </Text>
       )}
-
-      {isFetching ? (
-        <Loading />
-      ) : (
-        <Flex
-          alignItems={'center'}
-          flexDirection="column"
-          width={'100%'}
-          color="black"
-          fontFamily={'Castego'}
-          sx={{ gap: 4 }}
-          {...contentProps}
-        >
-          {children}
-        </Flex>
-      )}
+      <Flex
+        alignItems={'center'}
+        flexDirection="column"
+        width={'100%'}
+        color="black"
+        fontFamily={'Castego'}
+        sx={{ gap: 4 }}
+        {...contentProps}
+      >
+        {children}
+      </Flex>
+      {isFetching && <Loading />}
     </Flex>
   )
 }
