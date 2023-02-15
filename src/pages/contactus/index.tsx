@@ -50,13 +50,10 @@ export default function ContactUs({
 
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
-      <Section
-        title="Contact Us"
-        textProps={{ textAlign: 'start' }}
-        isFetching={isFetching}
-      >
+      <Section title="Contact Us" textProps={{ textAlign: 'start' }}>
         <CustomTable
           isCheckboxEnabled={true}
+          isFetching={isFetching}
           dataCols={[
             { field: 'id', name: 'ID' },
             {

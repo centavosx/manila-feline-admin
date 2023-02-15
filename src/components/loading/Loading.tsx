@@ -6,12 +6,14 @@ export const Loading = () => {
     <Flex
       sx={{
         position: 'absolute',
-        zIndex: 10000,
+        top: 0,
+        left: 0,
+        zIndex: 100000,
         backgroundColor: 'rgba(0,0,0,0.5)',
         paddingTop: '50%',
         paddingLeft: '50%',
-        height: '100vh',
-        width: '100vw',
+        height: '100%',
+        width: '100%',
       }}
     >
       <CircularProgress size={40} />

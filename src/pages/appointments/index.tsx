@@ -231,12 +231,9 @@ export default function Appointments({
 
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
-      <Section
-        title="Appointments"
-        textProps={{ textAlign: 'start' }}
-        isFetching={isFetching}
-      >
+      <Section title="Appointments" textProps={{ textAlign: 'start' }}>
         <CustomTable
+          isFetching={isFetching}
           isCheckboxEnabled={true}
           dataCols={[
             { field: 'refId', name: 'Reference ID' },

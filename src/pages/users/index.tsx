@@ -89,13 +89,10 @@ export default function AdminUsers({
 
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
-      <Section
-        title="Admin Users"
-        textProps={{ textAlign: 'start' }}
-        isFetching={isFetching}
-      >
+      <Section title="Admin Users" textProps={{ textAlign: 'start' }}>
         <CustomTable
           isCheckboxEnabled={true}
+          isFetching={isFetching}
           dataCols={[
             { field: 'id', name: 'ID' },
             {

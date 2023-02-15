@@ -1,6 +1,4 @@
 import { useState, useCallback, useEffect } from 'react'
-import { AxiosResponse } from 'axios'
-import { Type } from 'typescript'
 
 export const useApi = (api: () => any) => {
   const [data, setData] = useState<any>()
