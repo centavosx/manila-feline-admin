@@ -15,6 +15,7 @@ import {
 } from '@mui/material'
 import { Button } from '../button'
 import { useRouter } from 'next/router'
+import { useUser } from 'hooks'
 
 const LinkRef = ({
   href,
@@ -90,6 +91,7 @@ const navigations = [
 
 export const WebNavigation = ({ isLink }: { isLink?: boolean }) => {
   const { pathname, basePath } = useRouter()
+  const { logout } = useUser()
 
   return (
     <>
@@ -108,6 +110,26 @@ export const WebNavigation = ({ isLink }: { isLink?: boolean }) => {
           {data}
         </LinkRef>
       ))}
+      <Text
+        width={'auto'}
+        fontWeight={'bold'}
+        sx={{
+          fontSize: [14, 16],
+          fontFamily: 'Castego',
+          borderRadius: 8,
+          padding: 14,
+          cursor: 'pointer',
+          ':hover': {
+            backgroundColor: theme.mainColors.fifth,
+          },
+          '&&:active': {
+            backgroundColor: theme.mainColors.sixth,
+          },
+        }}
+        onClick={logout}
+      >
+        Logout
+      </Text>
     </>
   )
 }
