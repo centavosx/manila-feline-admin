@@ -34,6 +34,7 @@ import Avatar from '@mui/material/Avatar'
 import ListItemButton from '@mui/material/ListItemButton'
 import Typography from '@mui/material/Typography'
 import { Appointment, Status } from 'entities'
+import { Loading } from 'components/loading'
 
 const Color = {
   [Status.accepted]: 'blue',
@@ -80,6 +81,7 @@ function AlignItemsList({ date }: { date: Date }) {
         overflowX: 'hidden',
         height: 'auto',
         maxHeight: '100vh',
+        position: 'relative',
       }}
     >
       {appointments.length > 0 ? (
@@ -145,6 +147,7 @@ function AlignItemsList({ date }: { date: Date }) {
       ) : (
         <Text>No Appointments</Text>
       )}
+      {isFetching && <Loading />}
     </List>
   )
 }

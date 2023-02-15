@@ -103,10 +103,13 @@ export default function Doctors({
 
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
-      <Section title="Doctors" textProps={{ textAlign: 'start' }}>
+      <Section
+        title="Doctors"
+        textProps={{ textAlign: 'start' }}
+        isFetching={isFetching}
+      >
         <CustomTable
           isCheckboxEnabled={true}
-          isFetching={isFetching}
           dataCols={[
             { field: 'id', name: 'ID' },
             {

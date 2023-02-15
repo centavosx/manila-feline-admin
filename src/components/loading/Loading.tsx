@@ -16,7 +16,7 @@ export const Loading = () => {
         width: '100%',
       }}
     >
-      <CircularProgress size={40} />
+      <CircularProgress size={40} color={'secondary'} />
     </Flex>
   )
 }
