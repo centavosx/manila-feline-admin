@@ -69,7 +69,14 @@ export const CreateModalFlex = ({
       onSubmit={onSubmit}
       validationSchema={validationSchema}
     >
-      {({ isSubmitting, values, handleChange, submitForm, errors }) => (
+      {({
+        isSubmitting,
+        values,
+        handleChange,
+        submitForm,
+        errors,
+        setFieldError,
+      }) => (
         <FormContainer
           label={modalText}
           flexProps={{
@@ -174,7 +181,10 @@ export const CreateModalFlex = ({
                   />
                 )
               }}
-              onSubmit={async () => await submitForm()}
+              onSubmit={async () => {
+                if (isAvailable) setFieldError('password', undefined)
+                await submitForm()
+              }}
             >
               Submit
             </ButtonModal>
