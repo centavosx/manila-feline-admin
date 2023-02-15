@@ -76,6 +76,7 @@ export const CreateModalFlex = ({
         submitForm,
         errors,
         setFieldError,
+        ...other
       }) => (
         <FormContainer
           label={modalText}
@@ -182,8 +183,11 @@ export const CreateModalFlex = ({
                 )
               }}
               onSubmit={async () => {
-                if (isAvailable) setFieldError('password', undefined)
-                await submitForm()
+                if (isAvailable)
+                  return await onSubmit(values, {
+                    ...(other as unknown as FormikHelpers<any>),
+                  })
+                return await submitForm()
               }}
             >
               Submit
