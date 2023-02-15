@@ -23,6 +23,7 @@ import { TextField } from '@mui/material'
 import { start } from 'repl'
 import { Form, Formik } from 'formik'
 import { InputError } from 'components/input'
+import { Loading } from 'components/loading'
 
 const setTime = (
   dateToModify: string | Date,
@@ -342,6 +343,7 @@ export const Availability = ({
     [],
   ])
   const [isEdit, setIsEdit] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const editTime = useCallback(
     (date: DateProps[]) => {
@@ -368,11 +370,13 @@ export const Availability = ({
   }, [time, setTimeToPass])
 
   const onSubmit = useCallback(() => {
+    setIsSubmitting(true)
     updateAvailability(id, timeToPass).finally(() => {
+      setIsSubmitting(false)
       refetch()
       setIsEdit(false)
     })
-  }, [timeToPass, setIsEdit, id, refetch])
+  }, [timeToPass, setIsEdit, id, refetch, setIsSubmitting])
 
   useEffect(() => {
     if (!isEdit) changeTimeToPass()
@@ -380,6 +384,7 @@ export const Availability = ({
 
   return (
     <Flex flexDirection={'column'} flex={1} sx={{ gap: 2 }}>
+      {isSubmitting && <Loading />}
       <Flex flexDirection={['column', 'row']} sx={{ gap: 2 }}>
         <Text flex={1} as={'h3'}>
           Availability
@@ -395,7 +400,11 @@ export const Availability = ({
         >
           {!isEdit ? 'Edit' : 'Cancel'}
         </Button>
-        {isEdit && <Button onClick={onSubmit}>Save</Button>}
+        {isEdit && (
+          <Button onClick={onSubmit} disabled={isSubmitting}>
+            Save
+          </Button>
+        )}
       </Flex>
       {days.map((day, i) => (
         <Flex key={i} flexDirection={'column'} sx={{ gap: 2 }}>

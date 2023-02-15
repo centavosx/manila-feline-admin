@@ -8,13 +8,16 @@ import { Option, Select as SelectService } from 'components/select'
 import { Services as UserService } from 'entities'
 import { addUserService, removeService } from 'api'
 import { useRouter } from 'next/router'
+import { Loading } from 'components/loading'
 
 const AddService = ({
   onSubmit,
   service,
+  disabled,
 }: {
   onSubmit: (id?: string, callback?: () => void) => void
   service: UserService[]
+  disabled: boolean
 }) => {
   const { data } = useApi(async () => await getAllService())
   const [isAddService, setIsAddService] = useState<boolean>(false)
@@ -54,6 +57,7 @@ const AddService = ({
               })
             }
             style={{ width: 120 }}
+            disabled={disabled}
           >
             Save
           </Button>
@@ -97,28 +101,34 @@ export const Services = ({
   service: UserService[]
   refetch: () => void
 }) => {
+  const [submitting, setSubmitting] = useState(false)
   const submitService = useCallback(
     async (sId?: string, callback?: () => void) => {
+      setSubmitting(true)
       addUserService(id, sId ?? '').finally(() => {
+        setSubmitting(false)
         refetch()
         callback?.()
       })
     },
-    [refetch, id]
+    [refetch, id, setSubmitting]
   )
 
   const deleteService = useCallback(
     async (sId?: string, callback?: () => void) => {
+      setSubmitting(true)
       removeService(id, sId ?? '').finally(() => {
+        setSubmitting(false)
         refetch()
         callback?.()
       })
     },
-    [refetch, id]
+    [refetch, id, setSubmitting]
   )
 
   return (
     <Flex flexDirection={'column'} sx={{ gap: 2 }} mt={20} mb={20}>
+      {submitting && <Loading />}
       <Flex flexDirection={['column', 'row']}>
         <Text flex={1} as={'h3'}>
           Services
@@ -145,12 +155,17 @@ export const Services = ({
             activetextcolor={'white'}
             style={{ width: 80 }}
             onClick={() => deleteService(d.id)}
+            disabled={submitting}
           >
             Remove
           </Button>
         </Text>
       ))}
-      <AddService onSubmit={submitService} service={service} />
+      <AddService
+        onSubmit={submitService}
+        service={service}
+        disabled={submitting}
+      />
     </Flex>
   )
 }
