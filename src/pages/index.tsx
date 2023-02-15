@@ -14,6 +14,7 @@ import * as Yup from 'yup'
 import YupPassword from 'yup-password'
 import { login } from 'api'
 import { useUser } from 'hooks'
+import { Loading } from 'components/loading'
 YupPassword(Yup)
 
 type LoginDto = {
@@ -118,6 +119,7 @@ export default function Home() {
                   Submit
                 </Button>
               </Flex>
+              {isSubmitting && <Loading />}
             </FormContainer>
           )}
         </Formik>
