@@ -6,13 +6,7 @@ import { FormInput, SearchableInput } from 'components/input'
 import { Text } from 'components/text'
 
 import { Formik, FormikHelpers, FormikValues } from 'formik'
-import {
-  useState,
-  useCallback,
-  Dispatch,
-  SetStateAction,
-  ReactNode,
-} from 'react'
+import { useState, useCallback, Dispatch, SetStateAction } from 'react'
 import { Flex } from 'rebass'
 import { theme } from 'utils/theme'
 import ButtonModal from './Modal'
@@ -160,7 +154,9 @@ export const CreateModalFlex = ({
               hovercolor={theme.mainColors.second}
               textcolor={theme.colors.verylight}
               disabled={
-                Object.keys(errors).length > 0 ||
+                Object.keys(errors)?.some((v) =>
+                  isAvailable && v === 'password' ? false : !!v
+                ) ||
                 isSubmitting ||
                 isSearching ||
                 (isError ? isAvailable : undefined)
@@ -249,7 +245,6 @@ export const AreYouSure = ({
 
 export const ConfirmationModal = ({
   refetch,
-
   selected,
   setSelected,
   modalCreate,

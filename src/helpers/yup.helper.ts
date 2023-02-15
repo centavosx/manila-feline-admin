@@ -3,13 +3,14 @@ import YupPassword from 'yup-password'
 YupPassword(Yup)
 
 const UserShape = {
-  name: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!'),
+  name: Yup.string().trim().min(2, 'Too Short!').max(50, 'Too Long!'),
   email: Yup.string()
+    .trim()
     .email('Must be an email!')
     .min(2, 'Too Short!')
     .max(50, 'Too Long!')
     .required('Required'),
-  password: Yup.string().password(),
+  password: Yup.string().trim().password().required('Required'),
 }
 
 export const FormikValidation = {
