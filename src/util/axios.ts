@@ -1,5 +1,7 @@
-import axios, { AxiosError } from 'axios'
+import axios, { AxiosError, AxiosRequestConfig } from 'axios'
 import { refreshToken } from '../api'
+import { compareDesc } from 'date-fns'
+import jwt_decode from 'jwt-decode'
 import Cookies from 'js-cookie'
 
 export const API = axios.create({
@@ -14,9 +16,28 @@ export const apiAuth = axios.create({
   baseURL: process.env.API,
 })
 
+export const validateToken = (token?: string) => {
+  if (token && token.length > 0) {
+    const { exp: jwtExpiryInSecs } = (jwt_decode(token) as any) || ({} as any)
+    const tokenOptions = !jwtExpiryInSecs
+      ? {}
+      : { expires: new Date(jwtExpiryInSecs * 1000) }
+    return tokenOptions?.expires
+      ? compareDesc(new Date(), tokenOptions?.expires) === 1
+      : false
+  }
+  return false
+}
+
+const runOnlyWhen = () => {
+  const isTokenValid = validateToken(localStorage.getItem('accessToken') ?? '')
+  return isTokenValid
+}
+
 apiRefreshAuth.interceptors.request.use(
   async (config) => {
     config.headers = {
+      ...config.headers,
       Authorization: `Bearer ${Cookies.get('refreshToken')}`,
     }
     return config
@@ -27,32 +48,41 @@ apiRefreshAuth.interceptors.request.use(
 apiAuth.interceptors.request.use(
   async (config) => {
     config.headers = {
+      ...config.headers,
       Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
     }
     return config
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
+  { runWhen: runOnlyWhen }
 )
 
 apiAuth.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError) => {
-    let e = error
-    const config = error.config as any
-    if (e?.response?.status === 401 && !config._retry) {
-      config._retry = true
+  async (error) => {
+    const originalRequest = error.config
+    const hasErrored = error.response && error.response.status === 403
+
+    if (hasErrored && originalRequest && !originalRequest._markForRetry) {
+      originalRequest._markForRetry = true
+      // Before retrying the request, repair the Authorization with fresh tokens from API
       try {
-        const data = await refreshToken()
-        apiAuth.defaults.headers.common['Authorization'] = data.accessToken
-        return apiAuth(config)
+        const { accessToken } = await refreshToken()
+        axios.defaults.headers.common['Authorization'] = 'Bearer ' + accessToken
+        return apiAuth(originalRequest)
       } catch (err) {
-        e = err as AxiosError
+        return Promise.reject(err)
       }
     }
-    if (e?.response?.status === 401) {
-      Cookies.remove('refreshToken')
+
+    // clear out all tokens if we get unauthorized error and force user to login
+    if (error?.response?.status === 401) {
       localStorage.clear()
+      Cookies.remove('refreshToken')
     }
-    return Promise.reject(e)
-  }
+
+    return Promise.reject(error)
+  },
+
+  { runWhen: runOnlyWhen }
 )
