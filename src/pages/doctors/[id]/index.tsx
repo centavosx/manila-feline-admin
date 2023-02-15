@@ -10,7 +10,7 @@ import { Services } from 'components/doctor/service'
 import { User } from 'entities'
 
 export default function Information({ id }: { id: string }) {
-  const { data, refetch } = useApi(async () => await getUser(id))
+  const { data, refetch, isFetching } = useApi(async () => await getUser(id))
   const user: User = data
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
@@ -22,6 +22,7 @@ export default function Information({ id }: { id: string }) {
           sx: { gap: [20, 40] },
           flexDirection: ['column', 'row'],
         }}
+        isFetching={isFetching}
       >
         <Flex flexDirection={'column'} flex={1} sx={{ gap: 2 }}>
           <Text as={'h2'}>{user?.name}</Text>
