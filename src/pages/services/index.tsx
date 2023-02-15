@@ -29,7 +29,7 @@ const modalInitial: ModalFlexProps = {
   isError: true,
   validationSchema: FormikValidation.createService,
   modalText: 'Add new service',
-  availableText: 'This user is available',
+  availableText: 'This service is already available',
   initial: {
     name: '',
     description: '',

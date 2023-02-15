@@ -26,7 +26,7 @@ type PageProps = NextPage & {
 
 const modalInitial: ModalFlexProps = {
   validationSchema: FormikValidation.createDoctor,
-  modalText: 'Add new admin',
+  modalText: 'Add new doctor',
   availableText: 'This user is available',
   initial: {
     name: '',
