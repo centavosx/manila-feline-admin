@@ -27,6 +27,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { TextField } from '@mui/material'
+import { Loading } from 'components/loading'
 
 export default function AppointmentInformation({ id }: { id: string }) {
   const ref = useRef<FormikProps<UpdateAppointmentDto>>(null)
@@ -139,7 +140,7 @@ export default function AppointmentInformation({ id }: { id: string }) {
               })
           }}
         >
-          {({ values, errors }) => (
+          {({ isSubmitting, values, errors }) => (
             <FormContainer
               flexProps={{
                 sx: {
@@ -149,6 +150,7 @@ export default function AppointmentInformation({ id }: { id: string }) {
                 },
               }}
             >
+              {isSubmitting && <Loading />}
               <Flex flexDirection={'column'} flex={1} sx={{ gap: 2 }}>
                 <Text as={'h2'}>Reference ID: {appointment?.refId}</Text>
                 <Text as={'h2'}>Name: {appointment?.name}</Text>

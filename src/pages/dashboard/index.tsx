@@ -73,82 +73,84 @@ function AlignItemsList({ date }: { date: Date }) {
   }, [date, refetch])
 
   return (
-    <List
-      sx={{
-        width: '100%',
-        maxWidth: '100%',
-        bgcolor: 'background.paper',
-        overflowX: 'hidden',
-        height: 'auto',
-        maxHeight: '100vh',
-        position: 'relative',
-      }}
-    >
-      {appointments.length > 0 ? (
-        appointments.map((d, i) => (
-          <Fragment key={i}>
-            <ListItem
-              alignItems="flex-start"
-              sx={{ width: '100%', padding: 0 }}
-            >
-              <ListItemButton
-                role={undefined}
-                onClick={() =>
-                  push({
-                    pathname: '/appointments/[id]',
-                    query: {
-                      id: d.id,
-                    },
-                  })
-                }
-                dense
+    <>
+      <List
+        sx={{
+          width: '100%',
+          maxWidth: '100%',
+          bgcolor: 'background.paper',
+          overflowX: 'hidden',
+          height: 'auto',
+          maxHeight: '100vh',
+          position: 'relative',
+        }}
+      >
+        {appointments.length > 0 ? (
+          appointments.map((d, i) => (
+            <Fragment key={i}>
+              <ListItem
+                alignItems="flex-start"
+                sx={{ width: '100%', padding: 0 }}
               >
-                <ListItemText
-                  primary={<Text as={'h2'}>{d.refId}</Text>}
-                  secondary={
-                    <React.Fragment>
-                      <Flex>
-                        {!!d?.doctor && (
-                          <Typography
-                            sx={{ display: 'inline' }}
-                            component="span"
-                            variant="body2"
-                            color="text.primary"
-                          >
-                            {d?.doctor.name}
-                          </Typography>
-                        )}
-                        <Text flex={1}>
-                          {` —${
-                            d.status !== Status.pending
-                              ? ' ' +
-                                format(new Date(d.startDate), 'hh:mm a') +
-                                ' to ' +
-                                format(new Date(d.endDate), 'hh:mm a')
-                              : ''
-                          } `}
-                        </Text>
-                        <Text
-                          as={'h4'}
-                          textAlign={'end'}
-                          sx={{ color: Color[d.status] }}
-                        >
-                          {d.status}
-                        </Text>
-                      </Flex>
-                    </React.Fragment>
+                <ListItemButton
+                  role={undefined}
+                  onClick={() =>
+                    push({
+                      pathname: '/appointments/[id]',
+                      query: {
+                        id: d.id,
+                      },
+                    })
                   }
-                />
-              </ListItemButton>
-            </ListItem>
-            <Divider sx={{ width: '100%' }} />
-          </Fragment>
-        ))
-      ) : (
-        <Text>No Appointments</Text>
-      )}
+                  dense
+                >
+                  <ListItemText
+                    primary={<Text as={'h2'}>{d.refId}</Text>}
+                    secondary={
+                      <React.Fragment>
+                        <Flex>
+                          {!!d?.doctor && (
+                            <Typography
+                              sx={{ display: 'inline' }}
+                              component="span"
+                              variant="body2"
+                              color="text.primary"
+                            >
+                              {d?.doctor.name}
+                            </Typography>
+                          )}
+                          <Text flex={1}>
+                            {` —${
+                              d.status !== Status.pending
+                                ? ' ' +
+                                  format(new Date(d.startDate), 'hh:mm a') +
+                                  ' to ' +
+                                  format(new Date(d.endDate), 'hh:mm a')
+                                : ''
+                            } `}
+                          </Text>
+                          <Text
+                            as={'h4'}
+                            textAlign={'end'}
+                            sx={{ color: Color[d.status] }}
+                          >
+                            {d.status}
+                          </Text>
+                        </Flex>
+                      </React.Fragment>
+                    }
+                  />
+                </ListItemButton>
+              </ListItem>
+              <Divider sx={{ width: '100%' }} />
+            </Fragment>
+          ))
+        ) : (
+          <Text>No Appointments</Text>
+        )}
+      </List>
       {isFetching && <Loading />}
-    </List>
+    </>
   )
 }
 
