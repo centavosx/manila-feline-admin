@@ -72,7 +72,7 @@ const LinkRef = ({
           backgroundColor: theme.mainColors.sixth,
         },
       }}
-      onClick={() => push({ pathname: href })}
+      onClick={() => push({ pathname: '/' + href })}
       {...others}
     >
       {children}
