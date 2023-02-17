@@ -389,10 +389,7 @@ export const Availability = ({
         <Text flex={1} as={'h3'}>
           Availability
         </Text>
-        <Text flex={1} as={'h6'}>
-          Note: Click the floppy disk icon to save the selected time before
-          saving.
-        </Text>
+
         <Button
           backgroundcolor={isEdit ? 'red' : undefined}
           textcolor={isEdit ? 'white' : undefined}
@@ -410,6 +407,10 @@ export const Availability = ({
           </Button>
         )}
       </Flex>
+      <Text flex={1} as={'h6'}>
+        Note: Click the floppy disk icon to save the selected time before
+        saving.
+      </Text>
       {days.map((day, i) => (
         <Flex key={i} flexDirection={'column'} sx={{ gap: 2 }}>
           {(timeToPass?.[i].length > 0 || isEdit) && (
