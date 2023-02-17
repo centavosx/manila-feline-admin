@@ -33,6 +33,7 @@ export const FormikValidation = {
   }),
   updateAppointment: Yup.object().shape({
     startDate: Yup.number()
+      .typeError('Enter correct start date')
       .integer('Enter start date')
       .lessThan(
         Yup.ref('endDate'),
@@ -40,6 +41,7 @@ export const FormikValidation = {
       )
       .required('Please select date'),
     endDate: Yup.number()
+      .typeError('Enter correct end date')
       .integer('Enter end date')
       .moreThan(Yup.ref('startDate'), 'End date must be higher than start date')
       .required('Please select date'),
