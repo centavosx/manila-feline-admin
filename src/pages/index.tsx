@@ -8,8 +8,6 @@ import { FormInput } from '../components/input'
 import { Formik } from 'formik'
 import { Button } from '../components/button'
 import { FormContainer } from '../components/forms'
-import { ServiceIcon } from '../components/icon'
-import { Collage } from 'components/collage'
 import * as Yup from 'yup'
 import YupPassword from 'yup-password'
 import { login } from 'api'
@@ -50,8 +48,8 @@ export default function Home() {
             setSubmitting(true)
             try {
               await login(values)
-              refetch()
-            } finally {
+              await refetch()
+            } catch {
               setSubmitting(false)
             }
           }}

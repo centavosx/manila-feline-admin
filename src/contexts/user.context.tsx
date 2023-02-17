@@ -7,7 +7,7 @@ import { me } from 'api'
 type DataType = {
   user: User | undefined
   setUser: React.Dispatch<React.SetStateAction<User | undefined>>
-  refetch: () => void
+  refetch: () => Promise<unknown>
   logout: () => void
 }
 
