@@ -107,9 +107,11 @@ export const ExistingTime = ({
 export const NewTime = ({
   timeToSet,
   onSubmit,
+  disabled,
 }: {
   timeToSet: DateProps[]
   onSubmit: (value: DateProps) => void
+  disabled: boolean
 }) => {
   const checkDate = useCallback(
     (date: Date) => {
@@ -176,6 +178,7 @@ export const NewTime = ({
                 renderInput={(params) => (
                   <TextField {...params} sx={{ flex: 1 }} />
                 )}
+                disabled={disabled}
               />
               <InputError error={errors.startDate} />
             </Flex>
@@ -199,20 +202,22 @@ export const NewTime = ({
                   <TextField {...params} sx={{ flex: 1 }} />
                 )}
                 minTime={dayjs(new Date(values.startDate as unknown as number))}
-                disabled={!values.startDate}
+                disabled={!values.startDate || disabled}
               />
               <InputError error={errors.endDate} />
             </Flex>
-            <IconButton
-              aria-label="submit"
-              color="success"
-              size={'small'}
-              sx={{ height: 40, width: 40, alignSelf: 'center' }}
-              type="submit"
-              disabled={isSubmitting}
-            >
-              <SaveIcon fontSize="small" />
-            </IconButton>
+            {!disabled && (
+              <IconButton
+                aria-label="submit"
+                color="success"
+                size={'small'}
+                sx={{ height: 40, width: 40, alignSelf: 'center' }}
+                type="submit"
+                disabled={isSubmitting}
+              >
+                <SaveIcon fontSize="small" />
+              </IconButton>
+            )}
           </Flex>
         </Form>
       )}
@@ -254,8 +259,9 @@ export const SelectTime = ({
             />
           )
         })}
-        {(time.length === 0 || isAdd) && !isDisabled && (
+        {(time.length === 0 || isAdd) && (
           <NewTime
+            disabled={isDisabled}
             timeToSet={time}
             onSubmit={(value) => {
               onChange?.([...time, value])
@@ -413,9 +419,7 @@ export const Availability = ({
       </Text>
       {days.map((day, i) => (
         <Flex key={i} flexDirection={'column'} sx={{ gap: 2 }}>
-          {(timeToPass?.[i].length > 0 || isEdit) && (
-            <Text as={'h4'}>{day}</Text>
-          )}
+          <Text as={'h4'}>{day}</Text>
 
           <SelectTime
             isDisabled={!isEdit}
