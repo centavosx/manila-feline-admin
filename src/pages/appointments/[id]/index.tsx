@@ -28,6 +28,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import { TextField } from '@mui/material'
 import { Loading } from 'components/loading'
+import { theme as colorTheme } from '../../../utils/theme'
 
 export default function AppointmentInformation({ id }: { id: string }) {
   const ref = useRef<FormikProps<UpdateAppointmentDto>>(null)
@@ -205,9 +206,8 @@ export default function AppointmentInformation({ id }: { id: string }) {
                       ...theme,
                       colors: {
                         ...theme.colors,
-
-                        primary25: '#f7efe3',
-                        primary: '#3f352c',
+                        primary25: colorTheme.colors.lightpink,
+                        primary: colorTheme.colors.darkpink,
                       },
                     })}
                     isDisabled={!edit}
@@ -278,9 +278,8 @@ export default function AppointmentInformation({ id }: { id: string }) {
                         ...theme,
                         colors: {
                           ...theme.colors,
-
-                          primary25: '#f7efe3',
-                          primary: '#3f352c',
+                          primary25: colorTheme.colors.lightpink,
+                          primary: colorTheme.colors.darkpink,
                         },
                       })}
                       isDisabled={!edit}

@@ -3,8 +3,9 @@ import {
   InputAdornment,
   TextField,
   TextFieldProps,
+  Theme,
 } from '@mui/material'
-import { styled } from '@mui/material/styles'
+import { styled, SxProps } from '@mui/material/styles'
 import { de } from 'date-fns/locale'
 import {
   ChangeEventHandler,
@@ -75,6 +76,8 @@ export const SearchableInput = ({
   onSearch,
   onChange,
   disabled,
+  sx,
+  loadingSize,
 }: {
   key?: any
   label?: string
@@ -84,19 +87,25 @@ export const SearchableInput = ({
   onSearch?: (val: string) => Promise<void>
   onChange?: ChangeEventHandler<HTMLTextAreaElement | HTMLInputElement>
   disabled?: boolean
+  sx?: SxProps<Theme>
+  loadingSize?: number
 }) => {
   const [val, setVal] = useState('')
   const [isSearching, setIsSearching] = useState<boolean>(false)
 
   useEffect(() => {
     setIsSearching(true)
-    const delay = setTimeout(() => {
-      onSearch?.(val).finally(() => setIsSearching(false))
-    }, 500)
-    return () => clearTimeout(delay)
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [val, setIsSearching])
+
+  useEffect(() => {
+    if (isSearching) {
+      const delay = setTimeout(() => {
+        onSearch?.(val).finally(() => setIsSearching(false))
+      }, 500)
+      return () => clearTimeout(delay)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSearching, val, setIsSearching])
 
   useEffect(() => {
     if (!!value) setVal(() => value)
@@ -122,7 +131,7 @@ export const SearchableInput = ({
         borderBottomColor: theme.mainColors.first,
         color: 'black',
       }}
-      sx={{ color: 'black', width: '100%' }}
+      sx={{ color: 'black', width: '100%', ...sx }}
       placeholder={placeHolder}
       onChange={onChangeValue}
       value={value ?? val}

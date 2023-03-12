@@ -35,6 +35,7 @@ import ListItemButton from '@mui/material/ListItemButton'
 import Typography from '@mui/material/Typography'
 import { Appointment, Status } from 'entities'
 import { Loading } from 'components/loading'
+import { theme } from 'utils/theme'
 
 const Color = {
   [Status.accepted]: 'blue',
@@ -73,7 +74,7 @@ function AlignItemsList({ date }: { date: Date }) {
   }, [date, refetch])
 
   return (
-    <>
+    <Flex sx={{ flexDirection: 'column', padding: 2 }}>
       <List
         sx={{
           width: '100%',
@@ -150,7 +151,7 @@ function AlignItemsList({ date }: { date: Date }) {
         )}
       </List>
       {isFetching && <Loading />}
-    </>
+    </Flex>
   )
 }
 
@@ -179,18 +180,33 @@ export default function Dashboard({ date }: DashboardProps) {
         <Flex
           width={'100%'}
           sx={{
+            borderStyle: 'solid',
+            borderColor: 'gray',
             backgroundColor: 'white',
-            height: '100%',
-            padding: 12,
+            borderWidth: 0.5,
             borderRadius: 5,
-            border: '0.5px solid gray',
-            gap: 10,
           }}
           flexDirection={'column'}
         >
-          <Text sx={{ color: 'black', fontSize: 18, fontWeight: 'bold' }}>
-            {format(!!date ? new Date(date) : new Date(), 'cccc LLLL d, yyyy')}
+          <Text
+            sx={{
+              color: theme.colors.white,
+              fontSize: 18,
+              fontWeight: 'bold',
+              width: '100%',
+              position: 'relative',
+              padding: 2,
+              borderTopLeftRadius: 5,
+              borderTopRightRadius: 5,
+              backgroundColor: theme.colors.black,
+            }}
+          >
+            {format(
+              new Date(date || new Date()).getTime(),
+              'cccc LLLL d, yyyy'
+            )}
           </Text>
+
           <AlignItemsList date={!!date ? new Date(date) : new Date()} />
         </Flex>
       </Section>

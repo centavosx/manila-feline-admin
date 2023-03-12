@@ -1,11 +1,11 @@
 import CalendarComponent, { CalendarProps } from 'react-calendar'
 import styled from '@emotion/styled'
+import { theme } from 'utils/theme'
 
 export const Calendar = styled(CalendarComponent)`
   && {
     padding: 5px;
     width: 100%;
-
     border-radius: 5px;
     border-width: 1px;
     button {
@@ -22,16 +22,21 @@ export const Calendar = styled(CalendarComponent)`
         color: black;
       }
     }
+    .react-calendar__tile--hasActive {
+      button:hover {
+        background: #e54373;
+      }
+    }
     .react-calendar__tile--now {
-      background-color: #b4a79e;
+      background-color: #e75480;
     }
     .react-calendar__tile--active:enabled:hover,
     .react-calendar__tile--active:enabled:focus {
-      background-color: #3f352c;
+      background-color: ${theme.colors.pink};
       color: white;
     }
     .react-calendar__tile--active {
-      background-color: #3f352c;
+      background-color: ${theme.colors.pink};
       color: white;
     }
     .react-calendar__tile {
@@ -41,6 +46,28 @@ export const Calendar = styled(CalendarComponent)`
     }
     button:disabled {
       color: grey;
+    }
+
+    .react-calendar__navigation {
+      background-color: black;
+      button,
+      span {
+        color: white;
+      }
+
+      button:active,
+      button:checked,
+      button:hover {
+        color: black;
+        span {
+          color: black;
+        }
+      }
+    }
+
+    .react-calendar__navigation button:disabled {
+      background-color: black;
+      color: white;
     }
     @media screen and (max-width: 900px) {
       .react-calendar__tile {

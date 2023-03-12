@@ -21,7 +21,50 @@ type PageProps = NextPage & {
   searchParams?: string
 }
 
-export default function Users({
+const modalInitial: ModalFlexProps = {
+  validationSchema: FormikValidation.createUser,
+  modalText: 'Add new admin',
+  availableText: 'This user is available',
+  initial: {
+    name: '',
+    email: '',
+    password: '',
+    role: Roles.ADMIN,
+  },
+  fields: [
+    {
+      field: 'email',
+      label: 'Email',
+      placeHolder: 'Please type email',
+      important: {
+        onSearch: async (val) => {
+          await getUser(undefined, val)
+        },
+      },
+    },
+    {
+      field: 'name',
+      label: 'Name',
+      placeHolder: 'Please type name',
+    },
+    {
+      type: 'password',
+      field: 'password',
+      label: 'Password',
+      placeHolder: 'Please type password',
+    },
+  ],
+  onSubmit: async (values, { setSubmitting }) => {
+    setSubmitting(true)
+    try {
+      await updateRole(values)
+    } finally {
+      setSubmitting(false)
+    }
+  },
+}
+
+export default function AdminUsers({
   limitParams,
   pageParams,
   searchParams,
@@ -33,7 +76,7 @@ export default function Users({
   } = useApi(
     async () =>
       await getAllUser(pageParams, limitParams, {
-        role: Roles.USER,
+        role: Roles.ADMIN,
         search: !!searchParams ? searchParams : undefined,
       })
   )
@@ -47,7 +90,7 @@ export default function Users({
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
       <Section
-        title="Users"
+        title="Admin Users"
         textProps={{ textAlign: 'start' }}
         isFetching={isFetching}
       >
@@ -101,11 +144,13 @@ export default function Users({
         >
           {(selected, setSelected) => (
             <ConfirmationModal
+              modalText="Assign Admin"
               selected={selected}
               setSelected={setSelected}
               refetch={refetch}
+              modalCreate={modalInitial}
               onRemove={async () => {
-                await deleteRole({ ids: selected }, Roles.USER)
+                await deleteRole({ ids: selected }, Roles.ADMIN)
               }}
             />
           )}

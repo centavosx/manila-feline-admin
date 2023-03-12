@@ -40,13 +40,14 @@ const LinkRef = ({
           fontSize: [14, 16],
           fontFamily: 'Castego',
           borderRadius: 8,
-          backgroundColor: isCurrent ? theme.mainColors.first : undefined,
+          backgroundColor: isCurrent ? theme.colors.blackgray : undefined,
+          color: 'pink',
           padding: 14,
           ':hover': {
             backgroundColor: theme.mainColors.fifth,
           },
           '&&:active': {
-            backgroundColor: theme.mainColors.sixth,
+            backgroundColor: theme.colors.blackgray,
           },
         }}
         {...others}
@@ -63,13 +64,16 @@ const LinkRef = ({
         fontFamily: 'Castego',
         borderRadius: 8,
         cursor: 'pointer',
-        backgroundColor: isCurrent ? theme.mainColors.first : undefined,
+        color: 'pink',
+        backgroundColor: isCurrent ? theme.colors.blackgray : undefined,
         padding: 14,
         ':hover': {
-          backgroundColor: theme.mainColors.fifth,
+          backgroundColor: '#7A7A7A',
+          color: 'pink',
         },
         '&&:active': {
-          backgroundColor: theme.mainColors.sixth,
+          backgroundColor: '#707070',
+          color: 'pink',
         },
       }}
       onClick={() => push({ pathname: '/' + href })}
@@ -84,9 +88,9 @@ const navigations = [
   'Dashboard',
   'Appointments',
   'Doctors',
+  'Admins',
   'Users',
   'Services',
-  'Contact Us',
 ]
 
 export const WebNavigation = ({ isLink }: { isLink?: boolean }) => {
@@ -121,10 +125,12 @@ export const WebNavigation = ({ isLink }: { isLink?: boolean }) => {
           cursor: 'pointer',
           color: theme.backgroundColors.darkbrown,
           ':hover': {
-            backgroundColor: theme.mainColors.fifth,
+            backgroundColor: '#7A7A7A',
+            color: 'pink',
           },
           '&&:active': {
-            backgroundColor: theme.mainColors.sixth,
+            backgroundColor: '#707070',
+            color: 'pink',
           },
         }}
         onClick={logout}

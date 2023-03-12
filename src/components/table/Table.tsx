@@ -29,7 +29,7 @@ import {
 } from '@mui/material'
 import { format } from 'date-fns'
 import { Flex } from 'rebass'
-import { Input } from 'components/input'
+import { Input, SearchableInput } from 'components/input'
 import { Button } from 'components/button'
 import { Loading } from 'components/loading'
 
@@ -145,7 +145,6 @@ type TableProps = {
 }
 
 const SearchInputField = ({ onSearch }: { onSearch?: (v: string) => void }) => {
-  const [search, setSearch] = useState<string>('')
   return (
     <Flex
       p={10}
@@ -153,17 +152,17 @@ const SearchInputField = ({ onSearch }: { onSearch?: (v: string) => void }) => {
       width={'100%'}
       sx={{ gap: 10, alignItems: 'center', justifyContent: 'center' }}
     >
-      <Input
-        placeholder="Search..."
-        value={search}
+      <SearchableInput
+        placeHolder="Search..."
         sx={{
-          input: {
-            padding: 1,
+          div: {
+            input: {
+              padding: 2,
+            },
           },
         }}
-        onChange={(e) => setSearch(() => e.target.value)}
+        onSearch={async (v) => await onSearch?.(v)}
       />
-      <Button onClick={() => onSearch?.(search)}>Search</Button>
     </Flex>
   )
 }

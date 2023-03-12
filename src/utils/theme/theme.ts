@@ -1,8 +1,14 @@
 export const theme = {
   colors: {
     text: '#111',
-    background: '#836953',
-    primary: '#534b43',
+    pink: 'pink',
+    darkpink: '#F55887',
+    lightpink: '#fddde6',
+    black: 'black',
+    blackgray: '#555555',
+    white: 'white',
+    background: 'pink',
+    primary: 'pink',
     secondary: '#3f3f3f',
     tertiary: '#3f352c',
     dark: '#836953',
@@ -11,7 +17,7 @@ export const theme = {
     verylight: '#f7efe3',
   },
   backgroundColors: {
-    primary: '#836953',
+    primary: 'pink',
     secondary: '#534b43',
     tertiary: '#3f3f3f',
     fourth: '#3f352c',
@@ -23,7 +29,7 @@ export const theme = {
     asphaltGray: '#807E78',
   },
   mainColors: {
-    first: '#3f352c',
+    first: 'pink',
     second: '#534b43',
     third: '#b4a79e',
     fourth: '#f7efe3',

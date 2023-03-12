@@ -48,7 +48,7 @@ const SideNav = ({
         justifyContent: 'start',
         transition: 'all 0.2s ease-in-out',
         borderRightWidth: 2,
-        borderRightColor: theme.mainColors.first,
+        borderRightColor: 'black',
         borderRightStyle: 'solid',
       }}
       flexDirection="column"
@@ -89,6 +89,7 @@ const SideNav = ({
             justifyContent: 'center',
             minWidth: null,
           }}
+          style={{ backgroundColor: 'transparent', color: 'black' }}
         >
           <FiMenu
             size={30}
@@ -131,11 +132,7 @@ export const Main = ({
         pageTitle={pageTitle}
         description="Set your appointment now"
       />
-      <Flex
-        width={'100vw'}
-        backgroundColor={theme.colors.background}
-        height={'100vh'}
-      >
+      <Flex width={'100vw'} backgroundColor={'lightgrey'} height={'100vh'}>
         <Flex
           flexDirection={'row'}
           sx={{
@@ -144,7 +141,7 @@ export const Main = ({
           alignSelf="start"
           justifyContent={'start'}
           width={'100vw'}
-          backgroundColor={theme.colors.verylight}
+          backgroundColor={'lightgrey'}
         >
           {pathname !== '/' && (
             <SideNav isLink={isLink} refCurrent={refValue} />
@@ -156,7 +153,7 @@ export const Main = ({
             width={'100%'}
             overflow={'auto'}
             flexDirection={'column'}
-            backgroundColor={'white'}
+            backgroundColor={pathname === '/' ? 'white' : theme.colors.pink}
           >
             {children}
           </Flex>

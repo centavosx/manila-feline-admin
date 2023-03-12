@@ -1,7 +1,7 @@
 import { TimeSetterProps } from 'components/doctor/availability'
 import { CreateUserDto } from 'dto'
 import { Roles, User } from 'entities'
-import { apiAuth } from '../util'
+import { API, apiAuth } from '../util'
 
 export const getAllUser = async (page: number, limit: number, other: any) => {
   const response = await apiAuth.get('/user', {
@@ -60,6 +60,15 @@ export const deleteRole = async (data: { ids: string[] }, role: Roles) => {
   const response = await apiAuth.patch(`/user/role`, data, {
     params: {
       role,
+    },
+  })
+  return response
+}
+
+export const resetPass = async (email: string) => {
+  const response = await API.get(`/user/forgot-pass`, {
+    params: {
+      email,
     },
   })
   return response
