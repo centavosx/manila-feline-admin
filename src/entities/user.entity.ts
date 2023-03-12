@@ -29,4 +29,5 @@ export type User = {
   availability?: Availability[]
   hasAm?: boolean
   hasPm?: boolean
+  verified?: boolean
 }
