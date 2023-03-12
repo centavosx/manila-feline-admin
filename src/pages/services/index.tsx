@@ -11,7 +11,7 @@ import { useApi } from 'hooks'
 import { useRouter } from 'next/router'
 
 import { ConfirmationModal, ModalFlexProps } from 'components/modal'
-import { FormikValidation } from 'helpers'
+import { checkId, FormikValidation } from 'helpers'
 import {
   addService,
   deleteService,
@@ -73,9 +73,19 @@ export default function Services({
     refetch,
   } = useApi(
     async () =>
-      await getAllService(pageParams, limitParams, {
-        search: !!searchParams ? searchParams : undefined,
-      })
+      await getAllService(
+        pageParams,
+        limitParams,
+        !!searchParams
+          ? checkId(searchParams)
+            ? {
+                id: searchParams,
+              }
+            : {
+                search: searchParams,
+              }
+          : {}
+      )
   )
   const { replace, query, pathname } = useRouter()
   const data: ResponseDto = dat ?? { data: [], total: 0 }

@@ -6,7 +6,7 @@ import { Section } from '../../components/sections'
 import { Response as ResponseDto } from 'dto'
 
 import { deleteRole, getAllUser, getUser, updateRole } from 'api'
-import { FormikValidation } from 'helpers'
+import { checkId, FormikValidation } from 'helpers'
 import { CustomTable } from 'components/table'
 import { NextPage } from 'next'
 import { useApi } from 'hooks'
@@ -89,10 +89,18 @@ export default function Doctors({
     refetch,
   } = useApi(
     async () =>
-      await getAllUser(pageParams, limitParams, {
-        role: Roles.DOCTOR,
-        search: !!searchParams ? searchParams : undefined,
-      })
+      await getAllUser(
+        pageParams,
+        limitParams,
+        !!searchParams
+          ? checkId(searchParams)
+            ? {
+                role: Roles.DOCTOR,
+                id: searchParams,
+              }
+            : { role: Roles.DOCTOR, search: searchParams }
+          : { role: Roles.DOCTOR }
+      )
   )
   const { replace, query, pathname, push } = useRouter()
   const data: ResponseDto = dat ?? { data: [], total: 0 }

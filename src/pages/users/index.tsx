@@ -13,7 +13,7 @@ import { useRouter } from 'next/router'
 
 import { Roles } from 'entities'
 import { ConfirmationModal, ModalFlexProps } from 'components/modal'
-import { FormikValidation } from 'helpers'
+import { checkId, FormikValidation } from 'helpers'
 
 type PageProps = NextPage & {
   limitParams: number
@@ -32,10 +32,18 @@ export default function Users({
     isFetching,
   } = useApi(
     async () =>
-      await getAllUser(pageParams, limitParams, {
-        role: Roles.USER,
-        search: !!searchParams ? searchParams : undefined,
-      })
+      await getAllUser(
+        pageParams,
+        limitParams,
+        !!searchParams
+          ? checkId(searchParams)
+            ? {
+                role: Roles.USER,
+                id: searchParams,
+              }
+            : { role: Roles.USER, search: searchParams }
+          : { role: Roles.USER }
+      )
   )
   const { replace, query, pathname } = useRouter()
   const data: ResponseDto = dat ?? { data: [], total: 0 }

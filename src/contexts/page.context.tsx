@@ -3,6 +3,7 @@ import React, { createContext, useState, useEffect } from 'react'
 import { useUser } from 'hooks'
 import { useRouter } from 'next/router'
 import { Main } from 'components/main'
+import { Roles } from 'entities'
 
 export const DataContext = createContext<undefined>(undefined)
 
@@ -13,9 +14,13 @@ export const PageProvider = ({
 }) => {
   const { user } = useUser()
   const { pathname, query, replace } = useRouter()
-
+  console.log(user)
   useEffect(() => {
-    if (!!user && pathname === '/') {
+    if (
+      !!user &&
+      user.roles.some((v) => (v as any).name === Roles.ADMIN) &&
+      pathname === '/'
+    ) {
       replace('/dashboard')
       return
     }
