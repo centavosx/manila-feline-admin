@@ -1,12 +1,10 @@
-import { CircularProgress, InputAdornment } from '@mui/material'
-import React, { ReactElement } from 'react'
+import React, { useState, useEffect, Dispatch, SetStateAction } from 'react'
 import { Button } from 'components/button'
 import { FormContainer } from 'components/forms'
 import { FormInput, SearchableInput } from 'components/input'
 import { Text } from 'components/text'
 
 import { Formik, FormikHelpers, FormikValues } from 'formik'
-import { useState, useCallback, Dispatch, SetStateAction } from 'react'
 import { Flex } from 'rebass'
 import { theme } from 'utils/theme'
 import ButtonModal from './Modal'
@@ -257,6 +255,19 @@ export const AreYouSure = ({
       </Flex>
     </Flex>
   )
+}
+
+type ModalUpdateType = {
+  field: string
+  type: string
+  disabled: boolean
+  placeHolder: string
+}[][]
+
+function UserUpdate<T>(data: T) {
+  useEffect(() => {}, [data])
+
+  return <>{}</>
 }
 
 export const ConfirmationModal = ({

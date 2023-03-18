@@ -23,10 +23,12 @@ export default function ButtonModal({
   children,
   modalChild,
   onSubmit,
+  width,
   ...props
 }: ButtonProps & {
   modalChild?: (props: ChildProps) => ReactNode
   onSubmit?: () => void
+  width?: string | number | string[] | number[]
 }) {
   const [open, setOpen] = useState<boolean>(false)
 
@@ -58,7 +60,7 @@ export default function ButtonModal({
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: ['80%', 450],
+            width: width ?? ['80%', 450],
             height: ['100%', 'auto'],
             backgroundColor: 'white',
             border: '1px solid gray',
