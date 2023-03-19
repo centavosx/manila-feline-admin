@@ -1,82 +1,18 @@
-import { Flex, Image, Link, Text } from 'rebass'
+import { Flex, Image, Text } from 'rebass'
 import Wave from 'react-wavify'
 import { theme } from 'utils/theme'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { Formik } from 'formik'
 import { FormContainer } from 'components/forms'
-import { FormInput, InputError } from 'components/input'
+import { FormInput } from 'components/input'
 import { Button } from 'components/button'
 import { FormikValidation } from 'helpers'
-import { login, resetPass } from 'api'
-import { useUser } from 'hooks'
+import { reset } from 'api'
 import { Loading } from 'components/loading'
 
-const ResetPassword = ({ onSubmit }: { onSubmit?: () => void }) => {
-  return (
-    <Formik
-      key={4}
-      initialValues={{ email: '' }}
-      onSubmit={(values, { setSubmitting }) => {
-        setSubmitting(true)
-        resetPass(values.email)
-          .then(() => {
-            alert('Reset password link has been sent.')
-            onSubmit?.()
-          })
-          .finally(() => {
-            setSubmitting(false)
-          })
-      }}
-      validationSchema={FormikValidation.forgot}
-    >
-      {({ values, isSubmitting }) => (
-        <FormContainer
-          flex={1}
-          label="Forgot Password"
-          labelProps={{ sx: { justifyContent: 'center' } }}
-          flexProps={{ sx: { gap: 20 } }}
-        >
-          {isSubmitting && <Loading />}
-          <FormInput
-            name="email"
-            type={'email'}
-            placeholder="Enter your email"
-            value={values.email}
-          />
-
-          <Flex>
-            <Flex flex={1}>
-              <Button
-                fullWidth={false}
-                style={{ width: 120, alignSelf: 'flex-end' }}
-                disabled={isSubmitting}
-                onClick={onSubmit}
-              >
-                Back
-              </Button>
-            </Flex>
-
-            <Button
-              type="submit"
-              fullWidth={false}
-              style={{ width: 120, alignSelf: 'flex-end' }}
-              disabled={isSubmitting}
-            >
-              Submit
-            </Button>
-          </Flex>
-        </FormContainer>
-      )}
-    </Formik>
-  )
-}
-
-export default function Login() {
+export default function Reset({ token }: { token: string }) {
   const { width, height } = useWindowSize()
-  const { refetch } = useUser()
-
-  const [isReset, setIsReset] = useState(false)
 
   let rotatedWidth = 0,
     rotatedHeight = 0,
@@ -163,7 +99,7 @@ export default function Login() {
           width: '100%',
           alignItems: 'center',
           height: '100%',
-          padding: 30,
+          padding: 50,
         }}
       >
         <Flex
@@ -217,65 +153,50 @@ export default function Login() {
             </Flex>
           </Flex>
         </Flex>
+        <Formik
+          key={2}
+          initialValues={{ password: '', confirm: '' }}
+          onSubmit={async (values, { setSubmitting }) => {
+            setSubmitting(true)
+            try {
+              await reset(token, values.password)
+            } finally {
+              setSubmitting(false)
+            }
+          }}
+          validationSchema={FormikValidation.reset}
+        >
+          {({ values, isSubmitting }) => (
+            <FormContainer
+              flex={1}
+              label="Reset your password"
+              labelProps={{ sx: { justifyContent: 'center' } }}
+              flexProps={{ sx: { gap: 20 } }}
+            >
+              {isSubmitting && <Loading />}
 
-        {!isReset ? (
-          <Formik
-            key={1}
-            initialValues={{ email: '', password: '' }}
-            validationSchema={FormikValidation.login}
-            onSubmit={(values, { setSubmitting }) => {
-              setSubmitting(true)
-              login(values)
-                .then(async () => await refetch())
-                .catch((v) => alert(v.response.data.message || 'Invalid user'))
-                .finally(() => {
-                  setSubmitting(false)
-                })
-            }}
-          >
-            {({ values, isSubmitting }) => (
-              <FormContainer
-                flex={1}
-                label="Login to your Account"
-                labelProps={{ sx: { justifyContent: 'center' } }}
-                flexProps={{ sx: { gap: 20 } }}
+              <FormInput
+                name="password"
+                type={'password'}
+                placeholder="Password"
+                value={values.password}
+              />
+              <FormInput
+                name="confirm"
+                type={'password'}
+                placeholder="Confirm Password"
+                value={values.confirm}
+              />
+              <Button
+                style={{ width: 180, alignSelf: 'center' }}
+                type="submit"
+                disabled={isSubmitting}
               >
-                {isSubmitting && <Loading />}
-                <FormInput
-                  name="email"
-                  type={'email'}
-                  placeholder="Email"
-                  value={values.email}
-                />
-                <FormInput
-                  name="password"
-                  type={'password'}
-                  placeholder="Password"
-                  value={values.password}
-                />
-                <Link
-                  sx={{ textAlign: 'right', cursor: 'pointer' }}
-                  onClick={() => setIsReset(true)}
-                >
-                  Forgot Password?
-                </Link>
-                <Button
-                  style={{ width: 120, alignSelf: 'center' }}
-                  type="submit"
-                  disabled={isSubmitting}
-                >
-                  Login
-                </Button>
-              </FormContainer>
-            )}
-          </Formik>
-        ) : (
-          <ResetPassword
-            onSubmit={() => {
-              setIsReset(false)
-            }}
-          />
-        )}
+                Reset Password
+              </Button>
+            </FormContainer>
+          )}
+        </Formik>
       </Flex>
     </Flex>
   )
@@ -304,4 +225,11 @@ function useWindowSize() {
   }, [])
 
   return windowSize
+}
+
+export async function getServerSideProps(context: any) {
+  const token = (context.query.token ?? '') as string
+  return {
+    props: { token },
+  }
 }

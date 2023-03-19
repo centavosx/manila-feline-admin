@@ -143,7 +143,7 @@ export const Main = ({
           width={'100vw'}
           backgroundColor={'lightgrey'}
         >
-          {pathname !== '/' && (
+          {pathname !== '/' && pathname !== '/reset' && (
             <SideNav isLink={isLink} refCurrent={refValue} />
           )}
           <Flex

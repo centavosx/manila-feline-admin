@@ -76,4 +76,24 @@ export const FormikValidation = {
       .max(50, 'Too Long!')
       .required('Required'),
   }),
+  reset: Yup.object().shape({
+    password: Yup.string().trim().password().required('Required'),
+    confirm: Yup.string()
+      .oneOf([Yup.ref('password')], 'Passwords must match')
+      .required('Required'),
+  }),
+  forgot: Yup.object().shape({
+    email: Yup.string()
+      .email('Must be an email!')
+      .min(2, 'Too Short!')
+      .max(50, 'Too Long!')
+      .required('Required'),
+  }),
+  login: Yup.object().shape({
+    email: Yup.string()
+      .email('Must be an email!')
+      .min(2, 'Too Short!')
+      .max(50, 'Too Long!')
+      .required('Required'),
+  }),
 }

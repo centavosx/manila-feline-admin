@@ -28,6 +28,10 @@ export const PageProvider = ({
   )
 
   useEffect(() => {
+    if (pathname === '/reset') {
+      setIsLoading(false)
+      return
+    }
     if (!!user) {
       if (
         !user.verified ||
