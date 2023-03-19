@@ -4,6 +4,7 @@ import {
   useState,
   Dispatch,
   SetStateAction,
+  useEffect,
 } from 'react'
 
 import Modal from '@mui/material/Modal'
@@ -24,11 +25,15 @@ export default function ButtonModal({
   modalChild,
   onSubmit,
   width,
+  height,
+  onClose,
   ...props
 }: ButtonProps & {
   modalChild?: (props: ChildProps) => ReactNode
   onSubmit?: () => void
+  onClose?: () => void
   width?: string | number | string[] | number[]
+  height?: string | number | string[] | number[]
 }) {
   const [open, setOpen] = useState<boolean>(false)
 
@@ -36,6 +41,10 @@ export default function ButtonModal({
     onSubmit?.()
     setOpen(false)
   }, [onSubmit, setOpen])
+
+  useEffect(() => {
+    if (!open) onClose?.()
+  }, [open])
 
   return (
     <>
@@ -61,7 +70,8 @@ export default function ButtonModal({
             left: '50%',
             transform: 'translate(-50%, -50%)',
             width: width ?? ['80%', 450],
-            height: ['100%', 'auto'],
+            height: 'auto',
+            maxHeight: height ?? ['80%', 'unset'],
             backgroundColor: 'white',
             border: '1px solid gray',
             borderRadius: '10px',
@@ -71,10 +81,12 @@ export default function ButtonModal({
             flexDirection: 'column',
           }}
         >
-          <AiOutlineClose
-            style={{ alignSelf: 'end', cursor: 'pointer' }}
-            onClick={() => setOpen(false)}
-          />
+          <Flex sx={{ alignSelf: 'end' }}>
+            <AiOutlineClose
+              style={{ cursor: 'pointer' }}
+              onClick={() => setOpen(false)}
+            />
+          </Flex>
           {open &&
             modalChild?.({ onSubmit: onSubmitSuccess, isOpen: open, setOpen })}
         </Flex>

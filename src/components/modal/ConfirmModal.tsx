@@ -1,4 +1,10 @@
-import React, { useState, useEffect, Dispatch, SetStateAction } from 'react'
+import React, {
+  useState,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+  ReactNode,
+} from 'react'
 import { Button } from 'components/button'
 import { FormContainer } from 'components/forms'
 import { FormInput, SearchableInput } from 'components/input'
@@ -67,6 +73,9 @@ export const CreateModalFlex = ({
       initialValues={initial}
       onSubmit={onSubmit}
       validationSchema={validationSchema}
+      validateOnMount
+      validateOnChange
+      validateOnBlur
     >
       {({
         isSubmitting,
@@ -157,10 +166,6 @@ export const CreateModalFlex = ({
 
           <Flex width={'100%'} justifyContent={'center'} mt={[10, 20, 30]}>
             <ButtonModal
-              backgroundcolor={theme.mainColors.eight}
-              activecolor={theme.colors.verylight}
-              hovercolor={theme.mainColors.second}
-              textcolor={theme.colors.verylight}
               disabled={
                 Object.keys(errors)?.some((v) =>
                   isAvailable && v === 'password' ? false : !!v
@@ -259,24 +264,136 @@ export const AreYouSure = ({
 
 type ModalUpdateType = {
   field: string
+  label: string
   type: string
   disabled: boolean
   placeHolder: string
-}[][]
+}[]
 
-function UserUpdate<T>(data: T) {
-  useEffect(() => {}, [data])
-
-  return <>{}</>
+type FieldEditProp<T> = {
+  initial: T
+  title: string
+  data: ModalUpdateType
 }
 
-export const ConfirmationModal = ({
+type ModalEdit<T> = {
+  data: FieldEditProp<T>[]
+  onSubmit: (v: T, formikHelpers: FormikHelpers<T>) => Promise<void>
+  schema?: any
+}
+
+function UserUpdate<T extends FormikValues>({
+  data,
+  initial,
+  onSubmit,
+  schema,
+  title,
+}: {
+  data: ModalUpdateType
+  initial: T
+  onSubmit: (v: T, formikHelpers: FormikHelpers<T>) => Promise<void>
+  schema?: any
+  title: string
+}) {
+  return (
+    <Formik<T>
+      initialValues={initial}
+      onSubmit={onSubmit}
+      validationSchema={schema}
+      validateOnMount
+      validateOnChange
+      validateOnBlur
+    >
+      {({ isSubmitting, errors, submitForm }) => (
+        <FormContainer
+          label={title}
+          flexProps={{
+            sx: { gap: 10 },
+            justifyContent: 'center',
+            alignItems: 'center',
+            alignSelf: 'center',
+            padding: 20,
+            width: '100%',
+            height: '100%',
+          }}
+        >
+          {isSubmitting && <Loading />}
+
+          <Flex
+            sx={{
+              gap: [10],
+              flexDirection: 'column',
+              width: '100%',
+              alignSelf: 'left',
+              overflow: 'auto',
+            }}
+          >
+            {data.map((d, i) => {
+              return (
+                <FormInput
+                  key={i}
+                  type={d.type}
+                  name={d.field}
+                  label={d.label}
+                  placeholder={d.placeHolder}
+                  variant="filled"
+                  inputcolor={{
+                    labelColor: 'gray',
+                    backgroundColor: 'white',
+                    borderBottomColor: theme.mainColors.first,
+                    color: 'black',
+                  }}
+                  sx={{ color: 'black', width: '100%' }}
+                  disabled={d.disabled}
+                />
+              )
+            })}
+          </Flex>
+          <Flex width={'100%'} justifyContent={'right'} mt={[10, 20, 30]}>
+            <ButtonModal
+              disabled={
+                Object.keys(errors)?.some((v) =>
+                  v === 'password' ? false : !!v
+                ) || isSubmitting
+              }
+              style={{ width: '200px' }}
+              modalChild={({ onSubmit, setOpen }) => {
+                return (
+                  <AreYouSure
+                    cancelText="No"
+                    confirmText="Yes"
+                    onSubmit={() => {
+                      onSubmit()
+                    }}
+                    setOpen={setOpen}
+                  />
+                )
+              }}
+              onSubmit={async () => {
+                return await submitForm()
+              }}
+            >
+              Submit
+            </ButtonModal>
+          </Flex>
+        </FormContainer>
+      )}
+    </Formik>
+  )
+}
+
+export function ConfirmationModal<T extends FormikValues>({
   refetch,
   selected,
   setSelected,
   modalCreate,
   onRemove,
-}: Props & { modalCreate?: ModalFlexProps; onRemove: () => Promise<void> }) => {
+  modalEdit,
+}: Props & {
+  modalCreate?: ModalFlexProps
+  onRemove: () => Promise<void>
+  modalEdit?: ModalEdit<T>
+}) {
   const { onSubmit: modalSubmit, ...others } = modalCreate ?? {
     onSubmit: undefined,
   }
@@ -299,6 +416,33 @@ export const ConfirmationModal = ({
           onSubmit={refetch}
         >
           Add
+        </ButtonModal>
+      )}
+      {!!modalEdit && selected.length > 0 && (
+        <ButtonModal
+          style={{ alignSelf: 'end' }}
+          width={'85%'}
+          height={'90%'}
+          modalChild={() => {
+            return (
+              <Flex flexDirection={'column'} sx={{ gap: 2 }}>
+                {modalEdit.data.map((v) => (
+                  <UserUpdate<T>
+                    key={JSON.stringify(v.initial)}
+                    data={v.data}
+                    initial={v.initial}
+                    onSubmit={modalEdit.onSubmit}
+                    schema={modalEdit.schema}
+                    title={v.title}
+                  />
+                ))}
+              </Flex>
+            )
+          }}
+          onSubmit={refetch}
+          onClose={refetch}
+        >
+          Edit
         </ButtonModal>
       )}
       {selected.length > 0 && (

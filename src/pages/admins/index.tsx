@@ -5,7 +5,7 @@ import { Section } from '../../components/sections'
 
 import { Response as ResponseDto } from 'dto'
 
-import { deleteRole, getAllUser, getUser, updateRole } from 'api'
+import { deleteRole, getAllUser, getUser, updateRole, updateUser } from 'api'
 import { CustomTable } from 'components/table'
 import { NextPage } from 'next'
 import { useApi } from 'hooks'
@@ -24,7 +24,7 @@ type PageProps = NextPage & {
 const modalInitial: ModalFlexProps = {
   validationSchema: FormikValidation.createUser,
   modalText: 'Add new admin',
-  availableText: 'This user is available',
+  availableText: 'This user is already added',
   initial: {
     name: '',
     email: '',
@@ -38,7 +38,7 @@ const modalInitial: ModalFlexProps = {
       placeHolder: 'Please type email',
       important: {
         onSearch: async (val) => {
-          await getUser(undefined, val)
+          await getUser(undefined, val, Roles.ADMIN)
         },
       },
     },
@@ -62,6 +62,7 @@ const modalInitial: ModalFlexProps = {
       setSubmitting(false)
     }
   },
+  isError: true,
 }
 
 export default function AdminUsers({
@@ -151,7 +152,12 @@ export default function AdminUsers({
           }
         >
           {(selected, setSelected) => (
-            <ConfirmationModal
+            <ConfirmationModal<{
+              id: string
+              name: string
+              password: string
+              old: string
+            }>
               modalText="Assign Admin"
               selected={selected}
               setSelected={setSelected}
@@ -159,6 +165,53 @@ export default function AdminUsers({
               modalCreate={modalInitial}
               onRemove={async () => {
                 await deleteRole({ ids: selected }, Roles.ADMIN)
+              }}
+              modalEdit={{
+                onSubmit: async (v, { setSubmitting }) => {
+                  setSubmitting(true)
+                  updateUser(v)
+                    .then(() => alert('Success'))
+                    .catch((v) => alert(v.response.data.message || 'Error'))
+                    .finally(() => {
+                      setSubmitting(false)
+                    })
+                },
+                data: data?.data
+                  .filter((v) => selected.includes(v.id))
+                  .map((v) => {
+                    return {
+                      title: v.id,
+                      initial: {
+                        id: v.id,
+                        name: v.name,
+                        password: '',
+                        old: '',
+                      },
+                      data: [
+                        {
+                          type: 'text',
+                          field: 'name',
+                          disabled: false,
+                          label: 'Name',
+                          placeHolder: 'Type name',
+                        },
+                        {
+                          type: 'password',
+                          field: 'old',
+                          disabled: false,
+                          label: 'Old Password',
+                          placeHolder: 'Type old password',
+                        },
+                        {
+                          type: 'password',
+                          field: 'password',
+                          disabled: false,
+                          label: 'New Password',
+                          placeHolder: 'Type new password',
+                        },
+                      ],
+                    }
+                  }),
               }}
             />
           )}

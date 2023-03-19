@@ -21,6 +21,15 @@ export const addService = async (data: CreateServiceDto) => {
   return response
 }
 
+export const updateService = async (data: {
+  id: string
+  name: string
+  description: string
+}) => {
+  const response = await apiAuth.patch('/service', data)
+  return response
+}
+
 export const deleteService = async (data: { ids: string[] }) => {
   const response = await apiAuth.post(`/service/delete`, data)
   return response

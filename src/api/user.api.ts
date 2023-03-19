@@ -14,7 +14,7 @@ export const getAllUser = async (page: number, limit: number, other: any) => {
   return response
 }
 
-export const getUser = async (id?: string, email?: string) => {
+export const getUser = async (id?: string, email?: string, role?: Roles) => {
   let response
   if (!!id) {
     response = await apiAuth.get('/user/' + id + '/information', {})
@@ -22,6 +22,7 @@ export const getUser = async (id?: string, email?: string) => {
     response = await apiAuth.get('/user/search', {
       params: {
         email,
+        role,
       },
     })
   }
@@ -71,5 +72,17 @@ export const resetPass = async (email: string) => {
       email,
     },
   })
+  return response
+}
+
+export const updateUser = async (user: {
+  id: string
+  name?: string
+  position?: string
+  description?: string
+  password?: string
+  old?: string
+}) => {
+  const response = await apiAuth.patch(`/user/update-users`, user)
   return response
 }

@@ -17,6 +17,7 @@ import {
   deleteService,
   getAllService,
   searchService,
+  updateService,
 } from 'api/service.api'
 
 type PageProps = NextPage & {
@@ -150,7 +151,11 @@ export default function Services({
           }
         >
           {(selected, setSelected) => (
-            <ConfirmationModal
+            <ConfirmationModal<{
+              id: string
+              name: string
+              description: string
+            }>
               modalText="Assign Admin"
               selected={selected}
               setSelected={setSelected}
@@ -158,6 +163,45 @@ export default function Services({
               modalCreate={modalInitial}
               onRemove={async () => {
                 await deleteService({ ids: selected })
+              }}
+              modalEdit={{
+                onSubmit: async (v, { setSubmitting }) => {
+                  setSubmitting(true)
+                  updateService(v)
+                    .then(() => alert('Success'))
+                    .catch((v) => alert(v.response.data.message || 'Error'))
+                    .finally(() => {
+                      setSubmitting(false)
+                    })
+                },
+                data: data?.data
+                  .filter((v) => selected.includes(v.id))
+                  .map((v) => {
+                    return {
+                      title: v.id,
+                      initial: {
+                        id: v.id,
+                        name: v.name,
+                        description: v.description,
+                      },
+                      data: [
+                        {
+                          type: 'text',
+                          field: 'name',
+                          disabled: false,
+                          label: 'Name',
+                          placeHolder: 'Type name',
+                        },
+                        {
+                          type: 'text',
+                          field: 'description',
+                          disabled: false,
+                          label: 'Desccription',
+                          placeHolder: 'Type description',
+                        },
+                      ],
+                    }
+                  }),
               }}
             />
           )}

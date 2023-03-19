@@ -5,7 +5,7 @@ import { Section } from '../../components/sections'
 
 import { Response as ResponseDto } from 'dto'
 
-import { deleteRole, getAllUser, getUser, updateRole } from 'api'
+import { deleteRole, getAllUser, getUser, updateRole, updateUser } from 'api'
 import { checkId, FormikValidation } from 'helpers'
 import { CustomTable } from 'components/table'
 import { NextPage } from 'next'
@@ -27,11 +27,10 @@ type PageProps = NextPage & {
 const modalInitial: ModalFlexProps = {
   validationSchema: FormikValidation.createDoctor,
   modalText: 'Add new doctor',
-  availableText: 'This user is available',
+  availableText: 'This user is already added!',
   initial: {
     name: '',
     email: '',
-    password: '',
     position: '',
     description: '',
     role: Roles.DOCTOR,
@@ -43,7 +42,7 @@ const modalInitial: ModalFlexProps = {
       placeHolder: 'Please type email',
       important: {
         onSearch: async (val) => {
-          await getUser(undefined, val)
+          await getUser(undefined, val, Roles.DOCTOR)
         },
       },
     },
@@ -62,12 +61,6 @@ const modalInitial: ModalFlexProps = {
       label: 'Description',
       placeHolder: 'Please type description',
     },
-    {
-      type: 'password',
-      field: 'password',
-      label: 'Password',
-      placeHolder: 'Please type password',
-    },
   ],
   onSubmit: async (values, { setSubmitting }) => {
     setSubmitting(true)
@@ -77,6 +70,7 @@ const modalInitial: ModalFlexProps = {
       setSubmitting(false)
     }
   },
+  isError: true,
 }
 export default function Doctors({
   limitParams,
@@ -176,12 +170,64 @@ export default function Doctors({
           }
         >
           {(selected, setSelected) => (
-            <ConfirmationModal
-              modalText="Assign Admin"
+            <ConfirmationModal<{
+              id: string
+              name: string
+              position: string
+              description: string
+            }>
+              modalText="Assign Doctor"
               selected={selected}
               setSelected={setSelected}
               refetch={refetch}
               modalCreate={modalInitial}
+              modalEdit={{
+                onSubmit: async (v, { setSubmitting }) => {
+                  setSubmitting(true)
+                  updateUser(v)
+                    .then(() => alert('Success'))
+                    .catch((v) => alert(v.response.data.message || 'Error'))
+                    .finally(() => {
+                      setSubmitting(false)
+                    })
+                },
+                data: data?.data
+                  .filter((v) => selected.includes(v.id))
+                  .map((v) => {
+                    return {
+                      title: v.id,
+                      initial: {
+                        id: v.id,
+                        name: v.name,
+                        position: v.position,
+                        description: v.description,
+                      },
+                      data: [
+                        {
+                          type: 'text',
+                          field: 'name',
+                          disabled: false,
+                          label: 'Name',
+                          placeHolder: 'Type name',
+                        },
+                        {
+                          type: 'text',
+                          field: 'position',
+                          disabled: false,
+                          label: 'Position',
+                          placeHolder: 'Type position',
+                        },
+                        {
+                          type: 'text',
+                          field: 'description',
+                          disabled: false,
+                          label: 'Desccription',
+                          placeHolder: 'Type description',
+                        },
+                      ],
+                    }
+                  }),
+              }}
               onRemove={async () => {
                 await deleteRole({ ids: selected }, Roles.DOCTOR)
               }}

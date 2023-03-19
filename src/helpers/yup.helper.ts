@@ -17,9 +17,25 @@ export const FormikValidation = {
   createUser: Yup.object().shape(UserShape),
 
   createDoctor: Yup.object().shape({
-    ...UserShape,
-    position: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!'),
-    description: Yup.string().min(2, 'Too Short!').max(50, 'Too Long!'),
+    name: Yup.string()
+      .trim()
+      .min(2, 'Too Short!')
+      .max(50, 'Too Long!')
+      .required('Required'),
+    email: Yup.string()
+      .trim()
+      .email('Must be an email!')
+      .min(2, 'Too Short!')
+      .max(50, 'Too Long!')
+      .required('Required'),
+    position: Yup.string()
+      .min(2, 'Too Short!')
+      .max(50, 'Too Long!')
+      .required('Required'),
+    description: Yup.string()
+      .min(2, 'Too Short!')
+      .max(50, 'Too Long!')
+      .required('Required'),
   }),
   createService: Yup.object().shape({
     name: Yup.string()
