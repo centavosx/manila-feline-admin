@@ -159,7 +159,15 @@ export default function AppointmentInformation({ id }: { id: string }) {
                   Email: {appointment?.email}
                 </Text>
                 <Text as={'h3'}>Service: {appointment?.service?.name}</Text>
-                <Text>
+                <Text as={'h2'} mt={3}>
+                  Pet Information
+                </Text>
+                <Text as={'h3'}>Pet Name: {appointment?.petName}</Text>
+                <Text as={'h3'}>Age: {appointment?.age}</Text>
+                <Text as={'h3'}>Birthday: {appointment?.birthDate}</Text>
+                <Text as={'h3'}>Gender: {appointment?.gender}</Text>
+
+                <Text mt={3}>
                   <span style={{ fontWeight: 'bold' }}>Created</span>:{' '}
                   {format(
                     new Date(appointment?.created ?? 0),

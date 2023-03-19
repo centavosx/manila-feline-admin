@@ -13,6 +13,11 @@ export enum AmOrPm {
   PM = 'PM',
 }
 
+export enum Gender {
+  male = 'MALE',
+  female = 'FEMALE',
+}
+
 export type Appointment = {
   id: string
 
@@ -33,6 +38,14 @@ export type Appointment = {
   status: Status
 
   time: AmOrPm
+
+  petName: string | null
+
+  birthDate: string | null
+
+  age: number | null
+
+  gender: Gender | null
 
   verification: string | null
 

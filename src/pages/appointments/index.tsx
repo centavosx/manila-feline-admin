@@ -120,6 +120,25 @@ const Time: React.FC<{ onChange: (v: string) => void; error?: string }> = ({
   )
 }
 
+const SelectGender: React.FC<{
+  onChange: (v: string) => void
+  error?: string
+}> = ({ onChange, error }) => {
+  return (
+    <Flex sx={{ gap: 1, flexDirection: 'column' }}>
+      <SelectHandler onChange={onChange} title="Gender">
+        <MenuItem value={null as any}>Select...</MenuItem>
+        {['MALE', 'FEMALE'].map((data) => (
+          <MenuItem key={data} value={{ label: data, value: data } as any}>
+            {data}
+          </MenuItem>
+        ))}
+      </SelectHandler>
+      <InputError error={error} />
+    </Flex>
+  )
+}
+
 const DatePick: React.FC<{ onChange: (v: string) => void; error?: string }> = ({
   onChange,
   error,
@@ -158,6 +177,10 @@ const modalInitial: ModalFlexProps = {
     date: '',
     name: '',
     email: '',
+    petName: undefined,
+    birthDate: null,
+    age: undefined,
+    gender: null,
   },
   fields: [
     {
@@ -190,6 +213,29 @@ const modalInitial: ModalFlexProps = {
       placeHolder: 'Please type email',
     },
     {
+      field: 'petName',
+      label: 'Pet Name',
+      placeHolder: 'Please type your pet name',
+    },
+    {
+      field: 'age',
+      label: 'Pet Age',
+      type: 'number',
+      placeHolder: 'Please type your pet age',
+    },
+    {
+      field: 'birthDate',
+      custom: {
+        Jsx: DatePick,
+      },
+    },
+    {
+      field: 'gender',
+      custom: {
+        Jsx: SelectGender,
+      },
+    },
+    {
       field: 'message',
       label: 'Message',
       placeHolder: 'Please type message',
@@ -197,6 +243,10 @@ const modalInitial: ModalFlexProps = {
   ],
   onSubmit: async (values, { setSubmitting }) => {
     setSubmitting(true)
+    values.birthDate = values.birthDate
+      ? new Date(values?.birthDate).toDateString()
+      : undefined
+    values.age = Number(values.age)
     try {
       await newAppointment(values)
     } finally {

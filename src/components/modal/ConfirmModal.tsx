@@ -401,6 +401,7 @@ export function ConfirmationModal<T extends FormikValues>({
       {!!modalCreate && (
         <ButtonModal
           style={{ alignSelf: 'end' }}
+          height={'90%'}
           modalChild={({ onSubmit }) => {
             return (
               <CreateModalFlex
