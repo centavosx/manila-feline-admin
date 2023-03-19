@@ -173,7 +173,7 @@ export default function AdminUsers({
                     await updateUser(v)
                     alert('Success')
                   } catch (v: any) {
-                    alert(v?.response.data.message || 'Error')
+                    alert(v?.response?.data?.message || 'Error')
                   } finally {
                     setSubmitting(false)
                   }

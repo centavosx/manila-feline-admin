@@ -171,7 +171,7 @@ export default function Services({
                     await updateService(v)
                     alert('Success')
                   } catch (v: any) {
-                    alert(v?.response.data.message || 'Error')
+                    alert(v?.response?.data?.message || 'Error')
                   } finally {
                     setSubmitting(false)
                   }
