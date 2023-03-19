@@ -124,7 +124,11 @@ export default function AppointmentInformation({ id }: { id: string }) {
               ? new Date(appointment?.endDate).getTime()
               : undefined,
           }}
-          validationSchema={FormikValidation.updateAppointment}
+          validationSchema={
+            !!appointment?.doctor?.id
+              ? FormikValidation.updateAppointment
+              : undefined
+          }
           onSubmit={(v, { setSubmitting }) => {
             setSubmitting(true)
             const newValues: UpdateAppointmentDto = {
@@ -195,12 +199,16 @@ export default function AppointmentInformation({ id }: { id: string }) {
                     classNamePrefix="select"
                     isSearchable={true}
                     name="color"
-                    options={[
-                      { label: 'Pending', value: Status.pending },
-                      { label: 'Accepted', value: Status.accepted },
-                      { label: 'Completed', value: Status.completed },
-                      { label: 'Cancelled', value: Status.cancelled },
-                    ]}
+                    options={
+                      !!appointment?.doctor?.id
+                        ? [
+                            { label: 'Pending', value: Status.pending },
+                            { label: 'Accepted', value: Status.accepted },
+                            { label: 'Completed', value: Status.completed },
+                            { label: 'Cancelled', value: Status.cancelled },
+                          ]
+                        : [{ label: 'Pending', value: Status.pending }]
+                    }
                     value={[
                       { label: 'Pending', value: Status.pending },
                       { label: 'Accepted', value: Status.accepted },
