@@ -35,7 +35,7 @@ export default function ButtonModal({
   width?: string | number | string[] | number[]
   height?: string | number | string[] | number[]
 }) {
-  const [open, setOpen] = useState<boolean>(false)
+  const [open, setOpen] = useState<boolean | null>(null)
 
   const onSubmitSuccess = useCallback(() => {
     onSubmit?.()
@@ -43,7 +43,7 @@ export default function ButtonModal({
   }, [onSubmit, setOpen])
 
   useEffect(() => {
-    if (!open) onClose?.()
+    if (open === false) onClose?.()
   }, [open])
 
   return (
@@ -52,7 +52,7 @@ export default function ButtonModal({
         {children}
       </Button>
       <Modal
-        open={open}
+        open={!!open}
         onClose={() => setOpen(false)}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
@@ -88,7 +88,11 @@ export default function ButtonModal({
             />
           </Flex>
           {open &&
-            modalChild?.({ onSubmit: onSubmitSuccess, isOpen: open, setOpen })}
+            modalChild?.({
+              onSubmit: onSubmitSuccess,
+              isOpen: open,
+              setOpen: setOpen as Dispatch<SetStateAction<boolean>>,
+            })}
         </Flex>
       </Modal>
     </>
