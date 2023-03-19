@@ -167,12 +167,14 @@ export default function Services({
               modalEdit={{
                 onSubmit: async (v, { setSubmitting }) => {
                   setSubmitting(true)
-                  updateService(v)
-                    .then(() => alert('Success'))
-                    .catch((v) => alert(v.response.data.message || 'Error'))
-                    .finally(() => {
-                      setSubmitting(false)
-                    })
+                  try {
+                    await updateService(v)
+                    alert('Success')
+                  } catch (v: any) {
+                    alert(v?.response.data.message || 'Error')
+                  } finally {
+                    setSubmitting(false)
+                  }
                 },
                 data: data?.data
                   .filter((v) => selected.includes(v.id))

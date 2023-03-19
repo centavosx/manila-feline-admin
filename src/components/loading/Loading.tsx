@@ -1,22 +1,21 @@
-import { CircularProgress } from '@mui/material'
+import { CircularProgress, Modal } from '@mui/material'
 import { Flex } from 'rebass'
 
 export const Loading = () => {
   return (
-    <Flex
-      sx={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        zIndex: 100000,
-        backgroundColor: 'rgba(0,0,0,0.1)',
-        paddingTop: '25%',
-        paddingLeft: '50%',
-        height: '100%',
-        width: '100%',
-      }}
-    >
-      <CircularProgress size={40} color={'secondary'} />
-    </Flex>
+    <Modal open={true} sx={{ width: '100%', height: '100%' }}>
+      <Flex
+        sx={{
+          position: 'absolute' as 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          zIndex: -1,
+          outline: 'none !important',
+        }}
+      >
+        <CircularProgress size={40} />
+      </Flex>
+    </Modal>
   )
 }

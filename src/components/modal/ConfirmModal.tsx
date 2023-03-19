@@ -318,7 +318,6 @@ function UserUpdate<T extends FormikValues>({
           }}
         >
           {isSubmitting && <Loading />}
-
           <Flex
             sx={{
               gap: [10],
@@ -357,13 +356,13 @@ function UserUpdate<T extends FormikValues>({
                 ) || isSubmitting
               }
               style={{ width: '200px' }}
-              modalChild={({ onSubmit, setOpen }) => {
+              modalChild={({ onSubmit: sub, setOpen }) => {
                 return (
                   <AreYouSure
                     cancelText="No"
                     confirmText="Yes"
                     onSubmit={() => {
-                      onSubmit()
+                      sub()
                     }}
                     setOpen={setOpen}
                   />
@@ -373,7 +372,7 @@ function UserUpdate<T extends FormikValues>({
                 return await submitForm()
               }}
             >
-              Submit
+              Save
             </ButtonModal>
           </Flex>
         </FormContainer>

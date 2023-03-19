@@ -184,12 +184,14 @@ export default function Doctors({
               modalEdit={{
                 onSubmit: async (v, { setSubmitting }) => {
                   setSubmitting(true)
-                  updateUser(v)
-                    .then(() => alert('Success'))
-                    .catch((v) => alert(v.response.data.message || 'Error'))
-                    .finally(() => {
-                      setSubmitting(false)
-                    })
+                  try {
+                    await updateUser(v)
+                    alert('Success')
+                  } catch (v: any) {
+                    alert(v?.response.data.message || 'Error')
+                  } finally {
+                    setSubmitting(false)
+                  }
                 },
                 data: data?.data
                   .filter((v) => selected.includes(v.id))
