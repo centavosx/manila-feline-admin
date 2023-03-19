@@ -419,9 +419,20 @@ export function ConfirmationModal<T extends FormikValues>({
       )}
       {!!modalEdit && selected.length > 0 && (
         <ButtonModal
-          style={{ alignSelf: 'end' }}
+          style={{
+            alignSelf: 'end',
+            borderWidth: 0.5,
+            borderColor: 'gray',
+            borderStyle: 'solid',
+          }}
           width={'85%'}
           height={'90%'}
+          backgroundcolor={theme.colors.white}
+          textcolor={'black'}
+          hovercolor={'#e0e0e0'}
+          hovertextcolor={'black'}
+          activetextcolor={'black'}
+          activecolor={'#d6d6d6'}
           modalChild={() => {
             return (
               <Flex flexDirection={'column'} sx={{ gap: 2 }}>
