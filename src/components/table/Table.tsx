@@ -28,7 +28,7 @@ import {
   TableHead,
 } from '@mui/material'
 import { format } from 'date-fns'
-import { Flex } from 'rebass'
+import { Flex, Text } from 'rebass'
 import { Input, SearchableInput } from 'components/input'
 import { Button } from 'components/button'
 import { Loading } from 'components/loading'
@@ -310,6 +310,7 @@ export function CustomTable({
                   component="th"
                   scope="row"
                   onClick={() => onRowClick?.(row)}
+                  sx={{ width: d.field === 'id' ? 320 : undefined }}
                 >
                   {!!d.sub
                     ? d.sub === 'date'
@@ -332,6 +333,11 @@ export function CustomTable({
         </TableBody>
         <TableFooter>
           <TableRow>
+            <TableCell sx={{ width: 160, maxWidth: 180, position: 'absolute' }}>
+              <Text alignSelf={'center'} width={'100%'}>
+                Total Items: {total}
+              </Text>
+            </TableCell>
             <TablePagination
               rowsPerPageOptions={[1, 20, 50, 100]}
               count={total}
