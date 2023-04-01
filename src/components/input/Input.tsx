@@ -4,9 +4,9 @@ import {
   TextField,
   TextFieldProps,
   Theme,
+  Button,
 } from '@mui/material'
 import { styled, SxProps } from '@mui/material/styles'
-import { de } from 'date-fns/locale'
 import {
   ChangeEventHandler,
   useCallback,
@@ -15,7 +15,8 @@ import {
   ChangeEvent,
 } from 'react'
 import { theme } from 'utils/theme'
-import { FormInput } from './FormInput'
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined'
 
 export type InputColor = {
   inputcolor?: {
@@ -37,7 +38,35 @@ const TextInput = ({
   padding,
   ...other
 }: TextFieldProps & InputColor & { padding?: number }) => {
-  return <TextField sx={{ width: '100%', ...sx }} {...other} />
+  const [password, setPassword] = useState(false)
+  return (
+    <TextField
+      sx={{ width: '100%', ...sx }}
+      {...other}
+      type={!password ? other.type : 'text'}
+      InputProps={{
+        endAdornment: other.type === 'password' && (
+          <InputAdornment position="end">
+            <Button
+              style={{
+                marginRight: 14,
+                cursor: 'pointer',
+                padding: 0,
+                minWidth: 'auto',
+              }}
+              onClick={() => setPassword((v) => !v)}
+            >
+              {password ? (
+                <VisibilityOutlinedIcon />
+              ) : (
+                <VisibilityOffOutlinedIcon />
+              )}
+            </Button>
+          </InputAdornment>
+        ),
+      }}
+    />
+  )
 }
 export const Input = styled(TextInput)(({ inputcolor, padding }) => ({
   borderRadius: 4,
