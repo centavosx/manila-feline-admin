@@ -51,7 +51,7 @@ const TextInput = ({
               style={{
                 marginRight: 14,
                 cursor: 'pointer',
-                padding: 0,
+                padding: 3,
                 minWidth: 'auto',
               }}
               onClick={() => setPassword((v) => !v)}
