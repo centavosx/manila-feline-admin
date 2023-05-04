@@ -191,7 +191,7 @@ const BirthDatePick: React.FC<{
             return
           }}
           renderInput={(params) => <TextField {...params} />}
-          minDate={dayjs(new Date())}
+          maxDate={dayjs(new Date())}
         />
       </LocalizationProvider>
       <InputError error={error} />
