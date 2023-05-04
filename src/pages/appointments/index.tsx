@@ -139,32 +139,32 @@ const SelectGender: React.FC<{
   )
 }
 
-const DatePick: React.FC<{ onChange: (v: string) => void; error?: string }> = ({
-  onChange,
-  error,
-}) => {
-  const [date, setDate] = useState<Date | null>(null)
-
-  return (
-    <Flex flexDirection={'column'} sx={{ gap: 1 }}>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <DatePicker
-          label={'Select Date'}
-          value={date}
-          onChange={(newValue) => {
-            if (!newValue) return
-            const newDate = new Date(newValue as any)
-            setDate(() => newDate)
-            return onChange(newDate.toISOString())
-          }}
-          renderInput={(params) => <TextField {...params} />}
-          minDate={dayjs(new Date())}
-        />
-      </LocalizationProvider>
-      <InputError error={error} />
-    </Flex>
-  )
-}
+const DatePick =
+  (
+    what: 'date' | 'birth'
+  ): React.FC<{ onChange: (v: string) => void; error?: string }> =>
+  ({ onChange, error }) => {
+    const [date, setDate] = useState<Date | null>(null)
+    return (
+      <Flex flexDirection={'column'} sx={{ gap: 1 }}>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label={what === 'birth' ? 'Select birthdate' : 'Select date'}
+            value={date}
+            onChange={(newValue) => {
+              if (!newValue) return
+              const newDate = new Date(newValue as any)
+              setDate(() => newDate)
+              return onChange(newDate.toISOString())
+            }}
+            renderInput={(params) => <TextField {...params} />}
+            minDate={what === 'date' ? dayjs(new Date()) : undefined}
+          />
+        </LocalizationProvider>
+        <InputError error={error} />
+      </Flex>
+    )
+  }
 
 const modalInitial: ModalFlexProps = {
   isError: true,
@@ -198,7 +198,7 @@ const modalInitial: ModalFlexProps = {
     {
       field: 'date',
       custom: {
-        Jsx: DatePick,
+        Jsx: DatePick('date'),
       },
     },
     {
@@ -226,7 +226,7 @@ const modalInitial: ModalFlexProps = {
     {
       field: 'birthDate',
       custom: {
-        Jsx: DatePick,
+        Jsx: DatePick('birth'),
       },
     },
     {
