@@ -78,7 +78,7 @@ export const ExistingTime = ({
         disabled={true}
       />
       <TimePicker
-        label="Start Time"
+        label="End Time"
         showToolbar={true}
         value={time.endDate}
         closeOnSelect={true}
@@ -169,6 +169,8 @@ export const NewTime = ({
                   if (!newValue) return
                   const date = new Date(newValue.toString())
 
+                  if (isNaN(date as unknown as number)) return
+
                   if (checkDate(date)) return
                   setFieldValue('startDate', date.getTime())
                 }}
@@ -191,6 +193,8 @@ export const NewTime = ({
                 onChange={(newValue) => {
                   if (!newValue) return
                   const date = new Date(newValue.toString())
+
+                  if (isNaN(date as unknown as number)) return
 
                   if (checkDate(date)) return
 

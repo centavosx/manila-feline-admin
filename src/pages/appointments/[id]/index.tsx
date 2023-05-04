@@ -553,6 +553,7 @@ const SelectDateAndTime = ({
               onChange={(newValue) => {
                 if (!newValue) return
                 const newDate = new Date(newValue as any)
+                if (isNaN(newDate as unknown as number)) return
                 if (value === undefined) return onChange?.(newDate)
                 const nd = new Date(value)
                 nd.setDate(newDate.getDate())
@@ -571,6 +572,7 @@ const SelectDateAndTime = ({
               value={value ?? minDate ?? null}
               onChange={(newValue) => {
                 const d = new Date(newValue as any)
+                if (isNaN(d as unknown as number)) return
                 if (!!minDate) {
                   d.setDate(minDate?.getDate())
                   d.setMonth(minDate?.getMonth())
