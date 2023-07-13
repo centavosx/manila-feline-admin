@@ -6,7 +6,7 @@ import {
   Theme,
 } from '@mui/material'
 import { styled, SxProps } from '@mui/material/styles'
-import { de } from 'date-fns/locale'
+
 import {
   ChangeEventHandler,
   useCallback,

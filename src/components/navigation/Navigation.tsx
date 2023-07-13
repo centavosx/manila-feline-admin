@@ -91,6 +91,8 @@ const navigations = [
   'Admins',
   'Users',
   'Services',
+  'Products',
+  'Transactions',
 ]
 
 export const WebNavigation = ({ isLink }: { isLink?: boolean }) => {
