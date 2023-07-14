@@ -3,10 +3,10 @@ import type { AppProps } from 'next/app'
 import { ThemeProvider } from 'styled-components'
 import { createTheme } from '@mui/material'
 import { DataProvider } from 'contexts'
-import { PageProvider } from 'contexts/page.context'
 import NProgress from 'nprogress'
 import { useEffect } from 'react'
 import { Router } from 'next/router'
+import { Main } from 'components/main'
 
 const theme = createTheme()
 
@@ -34,9 +34,9 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <ThemeProvider theme={theme}>
       <DataProvider>
-        <PageProvider>
+        <Main isLink={true}>
           <Component {...pageProps} />
-        </PageProvider>
+        </Main>
       </DataProvider>
     </ThemeProvider>
   )

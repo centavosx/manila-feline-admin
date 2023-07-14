@@ -21,6 +21,7 @@ type InputFieldProp = {
   type?: string
   label?: string
   placeHolder?: string
+  multiline?: boolean
   important?: {
     onSearch: (val: string) => Promise<any>
   }
@@ -136,11 +137,17 @@ export const CreateModalFlex = ({
                       <d.custom.Jsx
                         key={i}
                         onChange={handleChange(d.field)}
+                        onMultipleChange={(key: string, value: any) =>
+                          other.setFieldValue(key, value)
+                        }
+                        fields={values}
                         error={errors[d.field]}
                       />
                     ) : (
                       <FormInput
                         key={i}
+                        multiline={d.multiline}
+                        maxRows={4}
                         type={d.type}
                         name={d.field}
                         label={d.label}

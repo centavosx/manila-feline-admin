@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { memo, useCallback, useEffect, useState } from 'react'
 import { Flex, Image } from 'rebass'
 
 import { Section } from '../../components/sections'
@@ -19,6 +19,8 @@ import {
   searchService,
   updateService,
 } from 'api/service.api'
+import { Button, UploadButton } from 'components/button'
+import { theme } from 'utils/theme'
 
 type PageProps = NextPage & {
   limitParams: number
@@ -26,31 +28,162 @@ type PageProps = NextPage & {
   searchParams?: string
 }
 
+type ProductType = {
+  name: string
+
+  shortDescription: string
+
+  description: string
+
+  category: string
+
+  items: number
+
+  images: string[]
+}
+
+const SelectableImage = memo(
+  ({
+    value,
+    height,
+    width,
+  }: {
+    height?: number
+    width?: number
+    value?: string
+  }) => {
+    const [image, setImage] = useState<File>()
+    const [imgString, setImgString] = useState<string | undefined>(value)
+    function getBase64(file: File) {
+      var reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = function () {
+        setImgString(reader.result as string)
+      }
+      reader.onerror = function (error) {
+        console.log('Error: ', error)
+      }
+    }
+
+    useEffect(() => {
+      if (!!image) getBase64(image)
+    }, [image])
+
+    return (
+      <Flex sx={{ position: 'relative' }}>
+        <Image src={imgString} height={height} width={width} />
+
+        <Flex
+          sx={{
+            position: 'absolute',
+            height: '100%',
+            width: '100%',
+            backgroundColor: 'black',
+            opacity: 0.5,
+            justifyContent: 'center',
+            alignItems: 'center',
+            p: 4,
+          }}
+        >
+          <UploadButton
+            style={{
+              width: '100%',
+            }}
+            onFileChange={async (f) => {
+              setImage(f[0])
+            }}
+            accept={['image/jpg', 'image/jpeg', 'image/png']}
+          >
+            <span
+              style={{
+                display: '-webkit-box',
+                color: theme.colors.white,
+                overflow: 'hidden',
+                whiteSpace: 'nowrap',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              Select...
+            </span>
+          </UploadButton>
+        </Flex>
+      </Flex>
+    )
+  }
+)
+
+const SelectImage: React.FC<{
+  onChange: (v: string) => void
+  fields: ProductType
+  onMultipleChange?: (key: keyof ProductType, value: any) => void
+  error?: string
+  value?: string[]
+}> = ({ onChange, error, value = [] }) => {
+  return (
+    <Flex flexDirection={['column', 'row']} sx={{ gap: 2 }}>
+      <Flex flexDirection={'column'} sx={{}}>
+        <SelectableImage height={158} width={158} value={value[0]} />
+      </Flex>
+      <Flex flexDirection={'column'} sx={{ gap: 2 }}>
+        <SelectableImage height={75} width={100} value={value[1]} />
+        <SelectableImage height={75} width={100} value={value[2]} />
+      </Flex>
+    </Flex>
+  )
+}
+
 const modalInitial: ModalFlexProps = {
   isError: true,
   validationSchema: FormikValidation.createService,
-  modalText: 'Add new service',
-  availableText: 'This service is already available',
+  modalText: 'Add New Product',
   initial: {
     name: '',
+
+    shortDescription: '',
+
     description: '',
+
+    category: '',
+
+    items: 0,
+
+    images: [] as string[],
   },
   fields: [
+    {
+      field: 'images',
+      label: 'Images',
+      custom: {
+        Jsx: SelectImage,
+      },
+    },
     {
       field: 'name',
       label: 'Name',
       placeHolder: 'Please type name',
-      important: {
-        onSearch: async (val) => {
-          await searchService(val)
-        },
-      },
+    },
+    {
+      field: 'shortDescription',
+      label: 'Short Description',
+      placeHolder: 'Please type short description',
+      multiline: true,
     },
     {
       field: 'description',
-      label: 'Description',
-      placeHolder: 'Please type description',
-      custom: { Jsx: (props) => <></> },
+      label: 'Long Description',
+      placeHolder: 'Please type long description',
+      multiline: true,
+    },
+    {
+      field: 'category',
+      label: 'Category',
+      placeHolder: 'Please type short category',
+    },
+    {
+      field: 'items',
+      label: 'Stock',
+      placeHolder: 'Stock',
+      type: 'number',
     },
   ],
   onSubmit: async (values, { setSubmitting }) => {
@@ -64,7 +197,7 @@ const modalInitial: ModalFlexProps = {
   },
 }
 
-export default function Services({
+export default function Products({
   limitParams,
   pageParams,
   searchParams,
@@ -112,11 +245,15 @@ export default function Services({
               name: 'Name',
             },
             {
-              field: 'description',
-              name: 'Description',
+              field: 'category',
+              name: 'Category',
+            },
+            {
+              field: 'items',
+              name: 'Stock',
             },
           ]}
-          dataRow={data?.data ?? []}
+          dataRow={[] as (ProductType & { id: string })[]}
           page={pageParams}
           pageSize={limitParams}
           total={data?.total ?? 0}
