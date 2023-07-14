@@ -144,7 +144,6 @@ const DatePick: React.FC<{ onChange: (v: string) => void; error?: string }> = ({
   error,
 }) => {
   const [date, setDate] = useState<Date | null>(null)
-
   return (
     <Flex flexDirection={'column'} sx={{ gap: 1 }}>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -154,11 +153,45 @@ const DatePick: React.FC<{ onChange: (v: string) => void; error?: string }> = ({
           onChange={(newValue) => {
             if (!newValue) return
             const newDate = new Date(newValue as any)
+
+            if (isNaN(newDate as unknown as number)) return
+
             setDate(() => newDate)
-            return onChange(newDate.toISOString())
+            onChange(newDate.toISOString())
+            return
           }}
           renderInput={(params) => <TextField {...params} />}
           minDate={dayjs(new Date())}
+        />
+      </LocalizationProvider>
+      <InputError error={error} />
+    </Flex>
+  )
+}
+
+const BirthDatePick: React.FC<{
+  onChange: (v: string) => void
+  error?: string
+}> = ({ onChange, error }) => {
+  const [date, setDate] = useState<Date | null>(null)
+  return (
+    <Flex flexDirection={'column'} sx={{ gap: 1 }}>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <DatePicker
+          label={'Select BirthDate'}
+          value={date}
+          onChange={(newValue) => {
+            if (!newValue) return
+            const newDate = new Date(newValue as any)
+
+            if (isNaN(newDate as unknown as number)) return
+
+            setDate(() => newDate)
+            onChange(newDate.toISOString())
+            return
+          }}
+          renderInput={(params) => <TextField {...params} />}
+          maxDate={dayjs(new Date())}
         />
       </LocalizationProvider>
       <InputError error={error} />
@@ -226,7 +259,7 @@ const modalInitial: ModalFlexProps = {
     {
       field: 'birthDate',
       custom: {
-        Jsx: DatePick,
+        Jsx: BirthDatePick,
       },
     },
     {
