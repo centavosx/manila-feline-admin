@@ -122,7 +122,11 @@ export const UploadProcess = memo(
     }, [link])
 
     return (
-      <Flex name={name} width={'auto'} flexDirection={'column'} sx={{ gap: 2 }}>
+      <Flex
+        name={name}
+        flexDirection={'column'}
+        sx={{ gap: 2, alignItems: 'center' }}
+      >
         {!!title && <Text {...textProps}>{title}</Text>}
 
         <Flex flexDirection={'row'} sx={{ gap: 2 }}>

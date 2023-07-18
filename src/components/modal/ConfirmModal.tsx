@@ -140,6 +140,7 @@ export const CreateModalFlex = ({
                         onMultipleChange={(key: string, value: any) =>
                           other.setFieldValue(key, value)
                         }
+                        errors={errors}
                         fields={values}
                         error={errors[d.field]}
                       />

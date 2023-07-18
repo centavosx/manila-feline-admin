@@ -103,4 +103,14 @@ export const FormikValidation = {
       .max(5000, 'Too Long!')
       .required('Required'),
   }),
+  createProduct: Yup.object().shape({
+    first: Yup.string().trim().required('Required'),
+    second: Yup.string().trim().required('Required'),
+    third: Yup.string().trim().required('Required'),
+    name: Yup.string().trim().required('Required'),
+    shortDescription: Yup.string().trim().required('Required'),
+    description: Yup.string().trim().required('Required'),
+    category: Yup.string().trim().required('Required'),
+    items: Yup.number().min(0, 'Minimum is zero').required('Required'),
+  }),
 }

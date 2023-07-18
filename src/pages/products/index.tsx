@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useEffect, useState } from 'react'
-import { Flex, Image } from 'rebass'
+import { Flex, Image, Text } from 'rebass'
 
 import { Section } from '../../components/sections'
 
@@ -19,8 +19,9 @@ import {
   searchService,
   updateService,
 } from 'api/service.api'
-import { Button, UploadButton } from 'components/button'
+import { Button, UploadButton, UploadProcess } from 'components/button'
 import { theme } from 'utils/theme'
+import { addProduct, getAllProduct } from 'api'
 
 type PageProps = NextPage & {
   limitParams: number
@@ -38,8 +39,6 @@ type ProductType = {
   category: string
 
   items: number
-
-  images: string[]
 }
 
 const SelectableImage = memo(
@@ -47,28 +46,17 @@ const SelectableImage = memo(
     value,
     height,
     width,
+    onChange,
   }: {
     height?: number
     width?: number
     value?: string
+    onChange: (v?: string) => void
   }) => {
-    const [image, setImage] = useState<File>()
     const [imgString, setImgString] = useState<string | undefined>(value)
-    function getBase64(file: File) {
-      var reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.onload = function () {
-        setImgString(reader.result as string)
-      }
-      reader.onerror = function (error) {
-        console.log('Error: ', error)
-      }
-    }
-
     useEffect(() => {
-      if (!!image) getBase64(image)
-    }, [image])
-
+      onChange(imgString)
+    }, [imgString])
     return (
       <Flex sx={{ position: 'relative' }}>
         <Image src={imgString} height={height} width={width} />
@@ -85,58 +73,75 @@ const SelectableImage = memo(
             p: 4,
           }}
         >
-          <UploadButton
-            style={{
-              width: '100%',
-            }}
-            onFileChange={async (f) => {
-              setImage(f[0])
-            }}
-            accept={['image/jpg', 'image/jpeg', 'image/png']}
-          >
-            <span
-              style={{
-                display: '-webkit-box',
-                color: theme.colors.white,
-                overflow: 'hidden',
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              Select...
-            </span>
-          </UploadButton>
+          <UploadProcess width={'100%'} onChange={(v) => setImgString(v)}>
+            Select...
+          </UploadProcess>
         </Flex>
       </Flex>
     )
   }
 )
 
-const SelectImage: React.FC<{
-  onChange: (v: string) => void
-  fields: ProductType
-  onMultipleChange?: (key: keyof ProductType, value: any) => void
+SelectableImage.displayName = 'SelectableImage'
+
+type CreateProduct = ProductType & {
+  first: string
+  second: string
+  third: string
+}
+
+export const SelectImage: React.FC<{
+  onChange?: (v: string) => void
+  fields: CreateProduct
+  onMultipleChange?: (key: keyof CreateProduct, value: any) => void
   error?: string
   value?: string[]
-}> = ({ onChange, error, value = [] }) => {
+  errors: any
+}> = ({ onMultipleChange, errors, fields }) => {
   return (
-    <Flex flexDirection={['column', 'row']} sx={{ gap: 2 }}>
-      <Flex flexDirection={'column'} sx={{}}>
-        <SelectableImage height={158} width={158} value={value[0]} />
+    <Flex mb={2} flexDirection={'column'}>
+      <Flex flexDirection={['column', 'row']} sx={{ gap: 2 }}>
+        <Flex flexDirection={'column'} sx={{}}>
+          <SelectableImage
+            height={158}
+            width={158}
+            value={fields.first}
+            onChange={(v) => onMultipleChange?.('first', v)}
+          />
+        </Flex>
+        <Flex flexDirection={'column'} sx={{ gap: 2 }}>
+          <SelectableImage
+            height={75}
+            width={100}
+            value={fields.second}
+            onChange={(v) => onMultipleChange?.('second', v)}
+          />
+          <SelectableImage
+            height={75}
+            width={100}
+            value={fields.third}
+            onChange={(v) => onMultipleChange?.('third', v)}
+          />
+        </Flex>
       </Flex>
-      <Flex flexDirection={'column'} sx={{ gap: 2 }}>
-        <SelectableImage height={75} width={100} value={value[1]} />
-        <SelectableImage height={75} width={100} value={value[2]} />
-      </Flex>
+      {(errors.first || errors.second || errors.third) && (
+        <Text color={'red'}>Please upload three images</Text>
+      )}
     </Flex>
   )
 }
 
 const modalInitial: ModalFlexProps = {
   isError: true,
-  validationSchema: FormikValidation.createService,
+  validationSchema: FormikValidation.createProduct,
   modalText: 'Add New Product',
   initial: {
+    first: '',
+
+    second: '',
+
+    third: '',
+
     name: '',
 
     shortDescription: '',
@@ -146,8 +151,6 @@ const modalInitial: ModalFlexProps = {
     category: '',
 
     items: 0,
-
-    images: [] as string[],
   },
   fields: [
     {
@@ -190,7 +193,7 @@ const modalInitial: ModalFlexProps = {
     setSubmitting(true)
 
     try {
-      await addService(values)
+      await addProduct(values)
     } finally {
       setSubmitting(false)
     }
@@ -208,7 +211,7 @@ export default function Products({
     refetch,
   } = useApi(
     async () =>
-      await getAllService(
+      await getAllProduct(
         pageParams,
         limitParams,
         !!searchParams
@@ -222,7 +225,7 @@ export default function Products({
           : {}
       )
   )
-  const { replace, query, pathname } = useRouter()
+  const { replace, query, pathname, push } = useRouter()
   const data: ResponseDto = dat ?? { data: [], total: 0 }
 
   useEffect(() => {
@@ -252,8 +255,19 @@ export default function Products({
               field: 'items',
               name: 'Stock',
             },
+            {
+              name: 'Avg rating',
+              custom: (data) =>
+                !!data.rating ? Number(data.rating).toFixed(2) : '0.00',
+            },
           ]}
-          dataRow={[] as (ProductType & { id: string })[]}
+          onRowClick={(v) => push('/products/' + v.id)}
+          dataRow={
+            (data.data ?? []) as (ProductType & {
+              id: string
+              rating: string
+            })[]
+          }
           page={pageParams}
           pageSize={limitParams}
           total={data?.total ?? 0}
