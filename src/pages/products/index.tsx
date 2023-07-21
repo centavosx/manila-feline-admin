@@ -38,6 +38,8 @@ type ProductType = {
 
   category: string
 
+  price: string
+
   items: number
 }
 
@@ -151,6 +153,8 @@ const modalInitial: ModalFlexProps = {
     category: '',
 
     items: 0,
+
+    price: 0,
   },
   fields: [
     {
@@ -185,7 +189,13 @@ const modalInitial: ModalFlexProps = {
     {
       field: 'items',
       label: 'Stock',
-      placeHolder: 'Stock',
+      placeHolder: 'Please type product number of stock',
+      type: 'number',
+    },
+    {
+      field: 'price',
+      label: 'Price (PHP)',
+      placeHolder: 'Please type product price',
       type: 'number',
     },
   ],
@@ -250,6 +260,10 @@ export default function Products({
             {
               field: 'category',
               name: 'Category',
+            },
+            {
+              name: 'Price',
+              custom: (data) => 'Php ' + data.price,
             },
             {
               field: 'items',

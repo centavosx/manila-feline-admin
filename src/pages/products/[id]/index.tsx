@@ -6,7 +6,7 @@ import { Section } from 'components/sections'
 import { Formik } from 'formik'
 import { Flex, Text } from 'rebass'
 import { theme } from 'utils/theme'
-import { string } from 'yup'
+
 import { SelectImage } from '..'
 import { useApi } from 'hooks'
 import { getProduct, getProductReview, updateProduct } from 'api'
@@ -32,6 +32,8 @@ type ProductType = {
   rating: string
 
   images?: { pos: string; link: string }[]
+
+  price: string
 }
 
 const DisplayStar = ({ selected }: { selected: number }) => {
@@ -113,6 +115,8 @@ export default function ProductInfo({ id }: { id: string }) {
               first: products.images[0] as string,
               second: products.images[1] as string,
               third: products.images[2] as string,
+
+              price: Number(products.price),
             }}
             onSubmit={(values: any, { setSubmitting }) => {
               const copy = structuredClone(values)
@@ -147,6 +151,20 @@ export default function ProductInfo({ id }: { id: string }) {
                 <FormInput
                   name="name"
                   label={'Product Name'}
+                  variant="filled"
+                  inputcolor={{
+                    labelColor: 'gray',
+                    backgroundColor: 'white',
+                    borderBottomColor: theme.mainColors.first,
+                    color: 'black',
+                  }}
+                  sx={{ color: 'black', width: '100%' }}
+                />
+                <FormInput
+                  name="price"
+                  type="number"
+                  label="Price"
+                  placeholder="Add product price"
                   variant="filled"
                   inputcolor={{
                     labelColor: 'gray',

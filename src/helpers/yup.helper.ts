@@ -112,5 +112,6 @@ export const FormikValidation = {
     description: Yup.string().trim().required('Required'),
     category: Yup.string().trim().required('Required'),
     items: Yup.number().min(0, 'Minimum is zero').required('Required'),
+    price: Yup.number().min(0, 'Minimum is zero').required('Required'),
   }),
 }
