@@ -61,7 +61,7 @@ export default function ProductInfo({ id }: { id: string }) {
     async () => await getProductReview(id)
   )
 
-  const { replace, query, pathname, push, back } = useRouter()
+  const { replace } = useRouter()
 
   useEffect(() => {
     if (!!error) replace('/products')
