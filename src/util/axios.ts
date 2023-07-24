@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosRequestConfig } from 'axios'
+import axios from 'axios'
 import { refreshToken } from '../api'
 import { compareDesc } from 'date-fns'
 import jwt_decode from 'jwt-decode'
@@ -30,7 +30,7 @@ export const validateToken = (token?: string) => {
 }
 
 const runOnlyWhen = () => {
-  const isTokenValid = validateToken(localStorage.getItem('accessToken') ?? '')
+  const isTokenValid = validateToken(Cookies.get('accessToken') ?? '')
   return isTokenValid
 }
 
@@ -39,7 +39,7 @@ apiRefreshAuth.interceptors.request.use(
     config.headers = {
       ...config.headers,
       Authorization: `Bearer ${Cookies.get('refreshToken')}`,
-    }
+    } as any
     return config
   },
   (error) => Promise.reject(error)
@@ -49,8 +49,8 @@ apiAuth.interceptors.request.use(
   async (config) => {
     config.headers = {
       ...config.headers,
-      Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-    }
+      Authorization: `Bearer ${Cookies.get('accessToken')}`,
+    } as any
     return config
   },
   (error) => Promise.reject(error),
@@ -77,7 +77,7 @@ apiAuth.interceptors.response.use(
 
     // clear out all tokens if we get unauthorized error and force user to login
     if (error?.response?.status === 401) {
-      localStorage.clear()
+      Cookies.remove('accessToken')
       Cookies.remove('refreshToken')
     }
 

@@ -12,16 +12,13 @@ import { useRouter } from 'next/router'
 
 import { ConfirmationModal, ModalFlexProps } from 'components/modal'
 import { checkId, FormikValidation } from 'helpers'
-import {
-  addService,
-  deleteService,
-  getAllService,
-  searchService,
-  updateService,
-} from 'api/service.api'
+import { addService, deleteService, updateService } from 'api/service.api'
 import { Button, UploadButton, UploadProcess } from 'components/button'
 import { theme } from 'utils/theme'
 import { addProduct, getAllProduct } from 'api'
+import { SelectHandler } from 'pages/appointments'
+import { MenuItem } from '@mui/material'
+import { InputError } from 'components/input'
 
 type PageProps = NextPage & {
   limitParams: number
@@ -90,6 +87,32 @@ type CreateProduct = ProductType & {
   first: string
   second: string
   third: string
+}
+
+export const CategoryComp: React.FC<{
+  onChange: (v: string) => void
+  error?: string
+  fields: CreateProduct
+  color?: string
+}> = ({ onChange, error, fields, color }) => {
+  return (
+    <Flex sx={{ gap: 1, flexDirection: 'column' }}>
+      <SelectHandler
+        onChange={onChange}
+        title="Category"
+        value={fields.category}
+        color={color}
+      >
+        <MenuItem value={null as any}>Select...</MenuItem>
+        {['Food', 'Toys', 'Litter', 'Accessories', 'Others'].map((data) => (
+          <MenuItem key={data} value={{ label: data, value: data } as any}>
+            {data}
+          </MenuItem>
+        ))}
+      </SelectHandler>
+      <InputError error={error} />
+    </Flex>
+  )
 }
 
 export const SelectImage: React.FC<{
@@ -184,7 +207,9 @@ const modalInitial: ModalFlexProps = {
     {
       field: 'category',
       label: 'Category',
-      placeHolder: 'Please type short category',
+      custom: {
+        Jsx: CategoryComp,
+      },
     },
     {
       field: 'items',
@@ -329,47 +354,6 @@ export default function Products({
               modalCreate={modalInitial}
               onRemove={async () => {
                 await deleteService({ ids: selected })
-              }}
-              modalEdit={{
-                onSubmit: async (v, { setSubmitting }) => {
-                  setSubmitting(true)
-                  try {
-                    await updateService(v)
-                    alert('Success')
-                  } catch (v: any) {
-                    alert(v?.response?.data?.message || 'Error')
-                  } finally {
-                    setSubmitting(false)
-                  }
-                },
-                data: data?.data
-                  .filter((v) => selected.includes(v.id))
-                  .map((v) => {
-                    return {
-                      title: v.id,
-                      initial: {
-                        id: v.id,
-                        name: v.name,
-                        description: v.description,
-                      },
-                      data: [
-                        {
-                          type: 'text',
-                          field: 'name',
-                          disabled: false,
-                          label: 'Name',
-                          placeHolder: 'Type name',
-                        },
-                        {
-                          type: 'text',
-                          field: 'description',
-                          disabled: false,
-                          label: 'Desccription',
-                          placeHolder: 'Type description',
-                        },
-                      ],
-                    }
-                  }),
               }}
             />
           )}

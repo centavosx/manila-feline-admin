@@ -21,6 +21,6 @@ export const login = async ({
   const response = await API.post('/user/login', { email, password })
 
   const { accessToken, refreshToken }: TokenDTO = response.data
-  localStorage.setItem('accessToken', accessToken)
+  Cookies.set('accessToken', accessToken)
   Cookies.set('refreshToken', refreshToken)
 }

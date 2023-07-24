@@ -37,14 +37,18 @@ type PageProps = NextPage & {
   time: AmOrPm
 }
 
-const SelectHandler = ({
+export const SelectHandler = ({
+  value,
   title,
   children,
   onChange,
+  color = 'transparent',
 }: {
   title: string
   children: ReactNode
   onChange: (v: string) => void
+  value?: string
+  color?: string
 }) => {
   return (
     <Select
@@ -55,7 +59,7 @@ const SelectHandler = ({
         return selected.label
       }}
       sx={{
-        background: 'rgba(0, 0, 0, 0.06)',
+        background: color,
         div: {
           borderColor: 'transparent',
         },
@@ -65,6 +69,7 @@ const SelectHandler = ({
           borderBottom: 1,
         },
       }}
+      value={!!value ? { label: value, value } : undefined}
       onChange={(e) => {
         const v = e.target.value
         onChange(!!v ? (v as any).value : '')
