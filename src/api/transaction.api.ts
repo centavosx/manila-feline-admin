@@ -16,10 +16,10 @@ export const getAllTransaction = async (
   return response
 }
 
-// export const getProduct = async (id: string) => {
-//   const response = await apiAuth.get('/product/' + id)
-//   return response
-// }
+export const getTransaction = async (id: string) => {
+  const response = await apiAuth.get('/transaction/' + id)
+  return response
+}
 
 // export const getProductReview = async (id: string) => {
 //   const response = await apiAuth.get('/product/' + id + '/review')

@@ -7,15 +7,21 @@ import { Formik } from 'formik'
 import { Flex, Text } from 'rebass'
 import { theme } from 'utils/theme'
 
-import { CategoryComp, SelectImage } from '..'
 import { useApi } from 'hooks'
-import { getProduct, getProductReview, updateProduct } from 'api'
+import {
+  getProduct,
+  getProductReview,
+  getTransaction,
+  updateProduct,
+} from 'api'
 import { useRouter } from 'next/router'
 import { AiFillStar, AiOutlineStar } from 'react-icons/ai'
 import { format } from 'date-fns'
 import { Button } from 'components/button'
 import { checkId, FormikValidation } from 'helpers'
 import { Loading } from 'components/loading'
+import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material'
+import { User } from 'entities'
 
 type ProductType = {
   id: string
@@ -36,222 +42,163 @@ type ProductType = {
   price: string
 }
 
-const DisplayStar = ({ selected }: { selected: number }) => {
-  return (
-    <Flex sx={{ gap: 1 }}>
-      {Array(5)
-        .fill(null)
-        .map((_, index) =>
-          index < selected ? (
-            <AiFillStar key={index} color={theme.colors.darkpink} size={18} />
-          ) : (
-            <AiOutlineStar key={index} size={18} />
-          )
-        )}
-    </Flex>
-  )
-}
+export default function TransactionInformation({ id }: { id: string }) {
+  const { push } = useRouter()
 
-export default function ProductInfo({ id }: { id: string }) {
   const { data, isFetching, error, refetch } = useApi(
-    async () => await getProduct(id)
+    async () => await getTransaction(id)
   )
 
-  const { data: productReview, isFetching: isReviewFetching } = useApi(
-    async () => await getProductReview(id)
-  )
+  const {
+    product,
+    refId: prodRefId,
+    created: prodCreated,
+    user: prodUser,
+    total: prodTotal,
+  } = useMemo(() => {
+    if (!data) return { product: [] }
+    let refId: string | undefined = undefined
+    let user: User | undefined = undefined
+    let created: string | undefined = undefined
+
+    let total = 0
+
+    const product = data.filter((v: any) => {
+      refId = v.refId
+      user = v.user
+      created = v.created
+
+      total += Number(v.transaction.price) * v.transaction.itemNumber
+
+      return !!v.transaction
+    })
+
+    return { product, refId, user, created, total }
+  }, [data])
+
+  const {
+    appointment,
+    refId: appointmentRefId,
+    created: appointmentCreated,
+    user: appointmentUser,
+    total: appointmentTotal,
+  } = useMemo(() => {
+    if (!data) return { appointment: [] }
+    let refId: string | undefined = undefined
+    let user: User | undefined = undefined
+    let created: string | undefined = undefined
+
+    let total = 0
+
+    const appointment = data.filter((v: any) => {
+      refId = v.refId
+      user = v.user
+      created = v.created
+      total += 100
+      return !!v.appointment
+    })
+
+    return { appointment, refId, user, created, total }
+  }, [data])
 
   const { replace } = useRouter()
 
   useEffect(() => {
-    if (!!error) replace('/products')
+    if (!!error) replace('/transactions')
   }, [error])
 
-  const products = useMemo(() => {
-    const d: ProductType = structuredClone(data)
-
-    const arr: string[] = []
-
-    if (!!d?.images) {
-      for (const val of d.images) {
-        if (val.pos === 'first') arr[0] = val.link
-        if (val.pos === 'second') arr[1] = val.link
-        if (val.pos === 'third') arr[2] = val.link
-      }
-      delete d.images
-    }
-
-    return { images: arr as string[], ...d }
-  }, [data])
+  const user: User | undefined = appointmentUser || prodUser
+  const created = appointmentCreated || prodCreated
+  const refId = appointmentRefId || prodRefId
+  const total: number = prodTotal || appointmentTotal || 0
 
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
       <Section
         title={
-          (<BackButton>Product Information</BackButton>) as JSX.Element & string
+          (<BackButton>Transaction Information</BackButton>) as JSX.Element &
+            string
         }
-        isFetching={isFetching || isReviewFetching}
+        isFetching={isFetching}
         textProps={{ textAlign: 'start' }}
         contentProps={{
           alignItems: 'start',
           sx: { gap: [20, 40] },
         }}
       >
-        {!!data && (
-          <Formik
-            validationSchema={FormikValidation.createProduct}
-            initialValues={{
-              id: products.id,
-              name: products.name,
-
-              shortDescription: products.shortDescription,
-
-              description: products.description,
-
-              category: products.category,
-
-              items: products.items,
-
-              first: products.images[0] as string,
-              second: products.images[1] as string,
-              third: products.images[2] as string,
-
-              price: Number(products.price),
-            }}
-            onSubmit={(values: any, { setSubmitting }) => {
-              const copy = structuredClone(values)
-              setSubmitting(true)
-              delete copy.id
-              updateProduct(id, copy).finally(() => {
-                setSubmitting(false)
-              })
-            }}
-          >
-            {({ values, errors, setFieldValue, isSubmitting }) => (
-              <FormContainer>
-                {!!isSubmitting && <Loading />}
-                <SelectImage
-                  fields={values as any}
-                  errors={errors}
-                  onMultipleChange={(key, value) => setFieldValue(key, value)}
-                />
-                <FormInput
-                  name="id"
-                  disabled={true}
-                  label={'ID'}
-                  variant="filled"
-                  inputcolor={{
-                    labelColor: 'gray',
-                    backgroundColor: 'white',
-                    borderBottomColor: theme.mainColors.first,
-                    color: 'black',
-                  }}
-                  sx={{ color: 'black', width: '100%' }}
-                />
-                <FormInput
-                  name="name"
-                  label={'Product Name'}
-                  variant="filled"
-                  inputcolor={{
-                    labelColor: 'gray',
-                    backgroundColor: 'white',
-                    borderBottomColor: theme.mainColors.first,
-                    color: 'black',
-                  }}
-                  sx={{ color: 'black', width: '100%' }}
-                />
-                <FormInput
-                  name="price"
-                  type="number"
-                  label="Price"
-                  placeholder="Add product price"
-                  variant="filled"
-                  inputcolor={{
-                    labelColor: 'gray',
-                    backgroundColor: 'white',
-                    borderBottomColor: theme.mainColors.first,
-                    color: 'black',
-                  }}
-                  sx={{ color: 'black', width: '100%' }}
-                />
-                <FormInput
-                  name="items"
-                  type="number"
-                  label="Quantity"
-                  placeholder="Add quantity"
-                  variant="filled"
-                  inputcolor={{
-                    labelColor: 'gray',
-                    backgroundColor: 'white',
-                    borderBottomColor: theme.mainColors.first,
-                    color: 'black',
-                  }}
-                  sx={{ color: 'black', width: '100%' }}
-                />
-                <FormInput
-                  label="Short Description"
-                  placeholder="Type short description"
-                  name="shortDescription"
-                  multiline={true}
-                  maxRows={4}
-                  variant="filled"
-                  inputcolor={{
-                    labelColor: 'gray',
-                    backgroundColor: 'white',
-                    borderBottomColor: theme.mainColors.first,
-                    color: 'black',
-                  }}
-                  sx={{ color: 'black', width: '100%' }}
-                />
-                <FormInput
-                  label="Long Description"
-                  placeholder="Type long description"
-                  name="description"
-                  multiline={true}
-                  maxRows={8}
-                  variant="filled"
-                  inputcolor={{
-                    labelColor: 'gray',
-                    backgroundColor: 'white',
-                    borderBottomColor: theme.mainColors.first,
-                    color: 'black',
-                  }}
-                  sx={{ color: 'black', width: '100%' }}
-                />
-                <CategoryComp
-                  onChange={(v) => setFieldValue('category', v)}
-                  fields={values}
-                  error={errors?.category as unknown as string}
-                  color="white"
-                />
-                <Button type="submit" style={{ width: 150 }}>
-                  Save
-                </Button>
-              </FormContainer>
-            )}
-          </Formik>
-        )}
-        {!!productReview && (
-          <Flex flexDirection={'column'} sx={{ gap: 2 }}>
-            <Text as={'h3'}>
-              Reviews (
-              {!!products.rating ? Number(products.rating).toFixed(2) : '0.00'})
-            </Text>
-            <Flex flexDirection={'column'} sx={{ gap: 4 }}>
-              {productReview.map((v: any, i: number) => (
-                <Flex flexDirection={'column'} sx={{ gap: 2 }} key={i}>
-                  <Text as={'h3'}>{v.user?.name}</Text>
-
-                  <DisplayStar selected={v.rating} />
-                  <Text>{v.comment}</Text>
-                  <Text sx={{ fontSize: 11, color: 'gray' }}>
-                    {format(new Date(v.created), `yyyy-MM-dd hh:mm aaaaa'm'`)}
-                  </Text>
-                </Flex>
-              ))}
+        <Flex flexDirection={'column'} sx={{ gap: 2 }} width={'100%'}>
+          <Text as={'h3'}>TransactionId: {refId}</Text>
+          <Text as={'h3'}>Total: Php {total?.toFixed(2)}</Text>
+          <Text as={'h5'}>
+            Created:{' '}
+            {!!created
+              ? format(new Date(created), `yyyy-MM-dd hh:mm aaaaa'm'`)
+              : undefined}
+          </Text>
+          {!!user && (
+            <Flex flexDirection={'column'} sx={{ gap: 2 }} mt={4}>
+              <Text as={'h4'}>User Info</Text>
+              <hr
+                color="black"
+                style={{ backgroundColor: 'black', width: '100%' }}
+              />
+              <Text>Id: {(user as any).id}</Text>
+              <Text>Name: {(user as any).name}</Text>
+              <Text>Email: {(user as any).email}</Text>
             </Flex>
-          </Flex>
-        )}
+          )}
+        </Flex>
+        <Table
+          sx={{ minWidth: 500, position: 'relative', backgroundColor: 'white' }}
+          aria-label="custom pagination table"
+          stickyHeader={true}
+        >
+          <TableHead>
+            <TableRow>
+              {(product.length > 0
+                ? ['Id', 'Product Name', 'Qty', 'Price']
+                : appointment.length > 0
+                ? ['Id', 'Product Name', 'Qty', 'Price']
+                : []
+              ).map((head) => (
+                <TableCell
+                  key={head as string}
+                  align={head !== 'Id' ? 'right' : 'left'}
+                >
+                  {head}
+                </TableCell>
+              ))}
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {product.length > 0 &&
+              product.map((row: any, i: any) => (
+                <TableRow key={i} hover={true} style={{ cursor: 'pointer' }}>
+                  {[
+                    row.transaction.product.id,
+                    row.transaction.product.name,
+                    row.transaction.itemNumber,
+                    'Php' + row.transaction.price,
+                  ].map((d, k) => (
+                    <TableCell
+                      key={k}
+                      component="th"
+                      scope="row"
+                      onClick={() =>
+                        push('/products/' + row.transaction.product.id)
+                      }
+                      sx={{
+                        width: k === 0 ? 320 : undefined,
+                        textAlign: k > 0 ? 'end' : undefined,
+                      }}
+                    >
+                      {d}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
       </Section>
     </Flex>
   )
