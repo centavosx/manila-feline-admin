@@ -12,10 +12,9 @@ import { useRouter } from 'next/router'
 
 import { ConfirmationModal, ModalFlexProps } from 'components/modal'
 import { checkId, FormikValidation } from 'helpers'
-import { addService, deleteService, updateService } from 'api/service.api'
-import { Button, UploadButton, UploadProcess } from 'components/button'
-import { theme } from 'utils/theme'
-import { addProduct, getAllProduct } from 'api'
+import { UploadProcess } from 'components/button'
+
+import { addProduct, deleteProduct, getAllProduct } from 'api'
 import { SelectHandler } from 'pages/appointments'
 import { MenuItem } from '@mui/material'
 import { InputError } from 'components/input'
@@ -353,7 +352,7 @@ export default function Products({
               refetch={refetch}
               modalCreate={modalInitial}
               onRemove={async () => {
-                await deleteService({ ids: selected })
+                await deleteProduct({ ids: selected })
               }}
             />
           )}

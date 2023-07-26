@@ -36,16 +36,7 @@ export const updateProduct = async (id: string, data: CreateProductDto) => {
   return response
 }
 
-export const deleteService = async (data: { ids: string[] }) => {
-  const response = await apiAuth.post(`/service/delete`, data)
-  return response
-}
-
-export const searchService = async (search: string) => {
-  const response = await apiAuth.get(`/service/search`, {
-    params: {
-      search,
-    },
-  })
+export const deleteProduct = async (data: { ids: string[] }) => {
+  const response = await apiAuth.post(`/product/delete`, data)
   return response
 }
