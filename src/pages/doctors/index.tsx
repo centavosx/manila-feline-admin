@@ -96,7 +96,7 @@ export default function Doctors({
           : { role: Roles.DOCTOR }
       )
   )
-  const { replace, query, pathname, push } = useRouter()
+  const { replace, query, pathname } = useRouter()
   const data: ResponseDto = dat ?? { data: [], total: 0 }
 
   useEffect(() => {
@@ -164,9 +164,6 @@ export default function Doctors({
                 search: v,
               },
             })
-          }
-          onRowClick={(v) =>
-            push({ pathname: '/doctors/[id]', query: { id: v.id } })
           }
         >
           {(selected, setSelected) => (

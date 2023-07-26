@@ -1,5 +1,11 @@
-import React, { ReactNode, useCallback, useEffect, useState } from 'react'
-import { Flex } from 'rebass'
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
+import { Flex, Text } from 'rebass'
 
 import { Section } from '../../components/sections'
 
@@ -13,21 +19,27 @@ import { useRouter } from 'next/router'
 import { ConfirmationModal, ModalFlexProps } from 'components/modal'
 import { FormikValidation } from 'helpers'
 import { getAllService } from 'api/service.api'
-import { deleteAppointment, getAppointment, newAppointment } from 'api'
-import { AmOrPm, Services, Status } from 'entities'
 import {
-  Checkbox,
-  MenuItem,
-  OutlinedInput,
-  Select,
-  TableHead,
-  TextField,
-} from '@mui/material'
-import { Option } from 'components/select'
+  deleteAppointment,
+  getAppointment,
+  getUnavailableAppointment,
+  newAppointment,
+} from 'api'
+import { AmOrPm, Services, Status } from 'entities'
+import { MenuItem, OutlinedInput, Select, TextField } from '@mui/material'
+import { Option, Select as Select2 } from 'components/select'
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers'
 import dayjs from 'dayjs'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { InputError } from 'components/input'
+import { theme as colorTheme } from 'utils/theme'
+import {
+  endOfDay,
+  endOfMonth,
+  format,
+  startOfDay,
+  startOfMonth,
+} from 'date-fns'
 
 type PageProps = NextPage & {
   limitParams: number
@@ -144,33 +156,124 @@ const SelectGender: React.FC<{
   )
 }
 
-const DatePick: React.FC<{ onChange: (v: string) => void; error?: string }> = ({
-  onChange,
-  error,
-}) => {
-  const [date, setDate] = useState<Date | null>(null)
+const DatePick: React.FC<{
+  onChange?: (v: string) => void
+  fields: any
+  onMultipleChange?: (key: string, value: any) => void
+  error?: string
+  value?: string[]
+  errors: any
+}> = ({ onMultipleChange, errors, fields: values }) => {
+  const [date, setDate] = useState<Date>(values.date)
+  const { isFetching, data, refetch } = useApi(
+    async () =>
+      await getUnavailableAppointment({
+        month: date.getMonth(),
+        year: date.getFullYear(),
+      })
+  )
+
+  useEffect(() => {
+    refetch()
+  }, [date])
+
+  const availableDates = useMemo(() => {
+    const start = startOfMonth(date)
+    const end = endOfMonth(date)
+
+    const parsedDate = data?.map((v: any) => v.date) ?? []
+
+    const dates: string[][] = []
+
+    while (start < end) {
+      const startDay = startOfDay(start)
+      const endDay = endOfDay(start)
+      const time: string[] = []
+      while (startDay < endDay) {
+        const timeFormat = format(startDay, 'yyyy-MM-dd HH')
+        if (!parsedDate.includes(timeFormat)) {
+          time.push(format(startDay, "hh:mm aaaaa'm'"))
+        }
+        startDay.setHours(startDay.getHours() + 1)
+      }
+      dates.push(time)
+      start.setDate(start.getDate() + 1)
+    }
+
+    return dates
+  }, [data, date])
+
+  const currentDateTime = availableDates[date.getDate() - 1]
+
+  const timeLabelAndValue = currentDateTime.map((v, i) => ({
+    label: v,
+    value: v.split(':')[0],
+  }))
+
   return (
-    <Flex flexDirection={'column'} sx={{ gap: 1 }}>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <DatePicker
-          label={'Select Date'}
-          value={date}
-          onChange={(newValue) => {
-            if (!newValue) return
-            const newDate = new Date(newValue as any)
+    <>
+      <Flex flexDirection={'column'} sx={{ gap: 1 }} mt={2}>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label={'Select Date'}
+            value={date}
+            onChange={(newValue) => {
+              if (!newValue) return
+              const newDate = new Date(newValue as any)
 
-            if (isNaN(newDate as unknown as number)) return
+              if (isNaN(newDate as unknown as number)) return
 
-            setDate(() => newDate)
-            onChange(newDate.toISOString())
-            return
+              setDate(() => newDate)
+              onMultipleChange?.('date', newDate.toISOString())
+
+              return
+            }}
+            renderInput={(params) => <TextField {...params} />}
+            minDate={dayjs(new Date())}
+          />
+        </LocalizationProvider>
+        <InputError error={errors?.date} />
+      </Flex>
+      <Flex sx={{ gap: 2 }} flexDirection={'column'} width={'100%'}>
+        <SelectHandler
+          value={values.time as string}
+          onChange={(v) => onMultipleChange?.('time', Number(v as any))}
+          title="Time"
+        >
+          <MenuItem value={null as any}>Time</MenuItem>
+          {timeLabelAndValue.map((data) => (
+            <MenuItem
+              key={data.label}
+              value={{ label: data.label, value: data.value } as any}
+            >
+              {data.label}
+            </MenuItem>
+          ))}
+        </SelectHandler>
+        <InputError error={errors?.time} />
+        {/* <Select
+          options={timeLabelAndValue}
+          value={timeLabelAndValue.find(
+            (v) => Number(v.value) === values?.time
+          )}
+          controlStyle={{
+            padding: 8,
+            borderColor: 'black',
+            backgroundColor: 'white',
           }}
-          renderInput={(params) => <TextField {...params} />}
-          minDate={dayjs(new Date())}
-        />
-      </LocalizationProvider>
-      <InputError error={error} />
-    </Flex>
+          onChange={(v) => onMultipleChange?.('time', Number((v as any).value))}
+          theme={(theme) => ({
+            ...theme,
+            colors: {
+              ...theme.colors,
+              primary25: colorTheme.colors.lightpink,
+              primary: colorTheme.colors.darkpink,
+            },
+          })}
+          placeholder="Select Time"
+        /> */}
+      </Flex>
+    </>
   )
 }
 
@@ -211,13 +314,12 @@ const modalInitial: ModalFlexProps = {
   availableText: 'This user is available',
   initial: {
     serviceId: '',
-    time: '',
-    date: '',
+    time: null,
+    date: new Date(),
     name: '',
     email: '',
     petName: undefined,
     birthDate: null,
-    age: undefined,
     gender: null,
   },
   fields: [
@@ -227,12 +329,7 @@ const modalInitial: ModalFlexProps = {
         Jsx: ServicesComp,
       },
     },
-    {
-      field: 'time',
-      custom: {
-        Jsx: Time,
-      },
-    },
+
     {
       field: 'date',
       custom: {
@@ -255,12 +352,7 @@ const modalInitial: ModalFlexProps = {
       label: 'Pet Name',
       placeHolder: 'Please type your pet name',
     },
-    {
-      field: 'age',
-      label: 'Pet Age',
-      type: 'number',
-      placeHolder: 'Please type your pet age',
-    },
+
     {
       field: 'birthDate',
       custom: {
@@ -281,12 +373,17 @@ const modalInitial: ModalFlexProps = {
   ],
   onSubmit: async (values, { setSubmitting }) => {
     setSubmitting(true)
-    values.birthDate = values.birthDate
-      ? new Date(values?.birthDate).toDateString()
-      : undefined
-    values.age = Number(values.age)
+    let copy = structuredClone({
+      ...values,
+      time: !!values.time ? (values.time >= 12 ? AmOrPm.PM : AmOrPm.AM) : '',
+    })
+    if (!!copy.date && !!values.time) {
+      const newDate = new Date(copy.date)
+      newDate.setHours(values.time)
+      copy.date = newDate.getTime()
+    }
     try {
-      await newAppointment(values)
+      await newAppointment(copy)
     } finally {
       setSubmitting(false)
     }
