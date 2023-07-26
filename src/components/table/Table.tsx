@@ -136,7 +136,7 @@ type TableProps<T extends object = any> = {
     newPage: number
   ) => void
   onRowClick?: (data: T) => void
-  children:
+  children?:
     | ((
         selected: any[],
         setSelected: Dispatch<SetStateAction<any[]>>
@@ -213,7 +213,7 @@ export function CustomTable<T extends object = any>({
         : children}
       <SearchInputField onSearch={onSearch} />
       <Table
-        sx={{ minWidth: 500, position: 'relative' }}
+        sx={{ minWidth: 500, position: 'relative', maxHeight: 100 }}
         aria-label="custom pagination table"
         stickyHeader={true}
       >

@@ -67,8 +67,8 @@ export default function TransactionInformation({ id }: { id: string }) {
       refId = v.refId
       user = v.user
       created = v.created
-
-      total += Number(v.transaction.price) * v.transaction.itemNumber
+      if (!!v.transaction)
+        total += Number(v.transaction.price) * v.transaction.itemNumber
 
       return !!v.transaction
     })
@@ -158,12 +158,12 @@ export default function TransactionInformation({ id }: { id: string }) {
               {(product.length > 0
                 ? ['Id', 'Product Name', 'Qty', 'Price']
                 : appointment.length > 0
-                ? ['Id', 'Product Name', 'Qty', 'Price']
+                ? ['RefId', 'Pet Name', 'Start Date', 'Status', 'Created']
                 : []
               ).map((head) => (
                 <TableCell
                   key={head as string}
-                  align={head !== 'Id' ? 'right' : 'left'}
+                  align={head !== 'Id' && head !== 'RefId' ? 'right' : 'left'}
                 >
                   {head}
                 </TableCell>
@@ -186,6 +186,39 @@ export default function TransactionInformation({ id }: { id: string }) {
                       scope="row"
                       onClick={() =>
                         push('/products/' + row.transaction.product.id)
+                      }
+                      sx={{
+                        width: k === 0 ? 320 : undefined,
+                        textAlign: k > 0 ? 'end' : undefined,
+                      }}
+                    >
+                      {d}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            {appointment.length > 0 &&
+              appointment.map((row: any, i: any) => (
+                <TableRow key={i} hover={true} style={{ cursor: 'pointer' }}>
+                  {[
+                    row.appointment.refId,
+                    row.appointment.petName,
+                    format(
+                      new Date(row.appointment.startDate),
+                      `yyyy-MM-dd hh:mm aaaaa'm'`
+                    ),
+                    row.appointment.status,
+                    format(
+                      new Date(row.appointment.created),
+                      `yyyy-MM-dd hh:mm aaaaa'm'`
+                    ),
+                  ].map((d, k) => (
+                    <TableCell
+                      key={k}
+                      component="th"
+                      scope="row"
+                      onClick={() =>
+                        push('/appointments/' + row.appointment.id)
                       }
                       sx={{
                         width: k === 0 ? 320 : undefined,

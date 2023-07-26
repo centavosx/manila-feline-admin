@@ -26,6 +26,8 @@ export default function Users({
   pageParams,
   searchParams,
 }: PageProps) {
+  const { push } = useRouter()
+
   const {
     data: dat,
     refetch,
@@ -77,6 +79,15 @@ export default function Users({
           pageSize={limitParams}
           total={data?.total ?? 0}
           rowIdentifierField={'id'}
+          onRowClick={(v) =>
+            push({
+              pathname: '/users/' + v.id,
+              query: {
+                name: v.name,
+                email: v.email,
+              },
+            })
+          }
           handleChangePage={(_, p) => {
             replace({
               pathname,

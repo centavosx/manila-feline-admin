@@ -10,15 +10,11 @@ import { NextPage } from 'next'
 import { useApi } from 'hooks'
 import { useRouter } from 'next/router'
 
-import { ConfirmationModal, ModalFlexProps } from 'components/modal'
-import { checkId, FormikValidation } from 'helpers'
-import { addService, deleteService, updateService } from 'api/service.api'
-import { Button, UploadButton, UploadProcess } from 'components/button'
-import { theme } from 'utils/theme'
-import { addProduct, getAllProduct, getAllTransaction } from 'api'
-import { SelectHandler } from 'pages/appointments'
-import { MenuItem } from '@mui/material'
-import { InputError } from 'components/input'
+import { ConfirmationModal } from 'components/modal'
+import { checkId } from 'helpers'
+import { deleteService } from 'api/service.api'
+
+import { getAllTransaction } from 'api'
 import { format } from 'date-fns'
 
 type PageProps = NextPage & {
@@ -35,7 +31,7 @@ type Transactiontype = {
   created: string
 }
 
-export default function Products({
+export default function Transactions({
   limitParams,
   pageParams,
   searchParams,
@@ -75,7 +71,7 @@ export default function Products({
         isFetching={isFetching}
       >
         <CustomTable
-          isCheckboxEnabled={true}
+          isCheckboxEnabled={false}
           dataCols={[
             {
               name: 'Transaction Id',
