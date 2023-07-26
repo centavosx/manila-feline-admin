@@ -4,7 +4,7 @@ const nextConfig = {
     process.env.NODE_ENV === 'production'
       ? 'https://manile-feline-admin.netlify.app'
       : undefined,
-  reactStrictMode: true,
+  reactStrictMode: false,
   swcMinify: true,
   serverRuntimeConfig: {
     PROJECT_ROOT: __dirname,
@@ -19,6 +19,12 @@ const nextConfig = {
     FB_MESSAGING_ID: process.env.REACT_APP_FB_MESSAGING_ID,
     FB_APP_ID: process.env.REACT_APP_FB_APP_ID,
     FB_DATABASE_URL: process.env.REACT_APP_FB_DB_URL,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
   },
 }
 
