@@ -47,24 +47,10 @@ export const FormikValidation = {
       .max(5000, 'Too Long!')
       .required('Required'),
   }),
-  updateAppointment: Yup.object().shape({
-    startDate: Yup.number()
-      .typeError('Enter correct start date')
-      .integer('Enter start date')
-      .lessThan(
-        Yup.ref('endDate'),
-        'Start date should be earlier than end date'
-      )
-      .required('Please select date'),
-    endDate: Yup.number()
-      .typeError('Enter correct end date')
-      .integer('Enter end date')
-      .moreThan(Yup.ref('startDate'), 'End date must be higher than start date')
-      .required('Please select date'),
-  }),
+
   createAppointment: Yup.object().shape({
     serviceId: Yup.string().required('Required'),
-    time: Yup.string().required('Required'),
+    time: Yup.number().nullable().required('Required'),
     date: Yup.string().required('Required'),
     name: Yup.string()
       .min(1, 'Too Short!')
@@ -78,8 +64,6 @@ export const FormikValidation = {
     petName: Yup.string().required('Required'),
 
     birthDate: Yup.string().nullable().required('Required'),
-
-    age: Yup.number().min(0).required('Required'),
 
     gender: Yup.string().nullable().required('Required'),
   }),
@@ -102,5 +86,16 @@ export const FormikValidation = {
       .min(1, 'Too Short!')
       .max(5000, 'Too Long!')
       .required('Required'),
+  }),
+  createProduct: Yup.object().shape({
+    first: Yup.string().trim().required('Required'),
+    second: Yup.string().trim().required('Required'),
+    third: Yup.string().trim().required('Required'),
+    name: Yup.string().trim().required('Required'),
+    shortDescription: Yup.string().trim().required('Required'),
+    description: Yup.string().trim().required('Required'),
+    category: Yup.string().trim().required('Required'),
+    items: Yup.number().min(0, 'Minimum is zero').required('Required'),
+    price: Yup.number().min(0, 'Minimum is zero').required('Required'),
   }),
 }

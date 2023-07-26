@@ -34,25 +34,40 @@ export const deleteAppointment = async (id: string[]) => {
   return response
 }
 
-export type UpdateAppointmentDto = {
-  doctorId?: string
+export type UpdateAppointmentDto<T extends any = number> = {
   serviceId?: string
   status?: Status
-  time?: AmOrPm
-  startDate?: Date | number
-  endDate?: Date | number
+  time?: T
   date?: Date | number
 }
 
 export const updateAppointment = async (
   id: string,
-  value: UpdateAppointmentDto
+  value: UpdateAppointmentDto<string>
 ) => {
-  const response = await apiAuth.patch('/appointments/' + id, value)
+  const response = await apiAuth.patch('/appointments/' + id, {
+    ...value,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  })
   return response
 }
 
 export const newAppointment = async (data: any) => {
-  const response = await apiAuth.post('/appointments/', data)
+  const response = await apiAuth.post('/appointments/', {
+    ...data,
+    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  })
   return response
+}
+
+export const getUnavailableAppointment = async (options?: {
+  month: number
+  year: number
+}) => {
+  return await apiAuth.get('/other/unavailable', {
+    params: {
+      ...options,
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    },
+  })
 }

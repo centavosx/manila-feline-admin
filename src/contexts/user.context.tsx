@@ -2,12 +2,13 @@ import React, { createContext, useCallback, useState, useEffect } from 'react'
 import { User } from '../entities'
 import jwt_decode from 'jwt-decode'
 import Cookies from 'js-cookie'
-import { me } from 'api'
+import { me } from '../api'
+import { useRouter } from 'next/navigation'
 
 type DataType = {
   user: User | undefined
   setUser: React.Dispatch<React.SetStateAction<User | undefined>>
-  refetch: () => Promise<unknown>
+  refetch: (refresh?: boolean) => Promise<unknown>
   logout: () => void
 }
 
@@ -18,26 +19,28 @@ export const DataProvider = ({
 }: {
   children: JSX.Element | JSX.Element[]
 }) => {
-  const token =
-    typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
-
+  const { refresh } = useRouter()
+  const token = Cookies.get('accessToken')
   const [user, setUser] = useState<User | undefined>(
     !!token ? jwt_decode(token) : undefined
   )
 
-  const getMe = useCallback(async () => {
+  const getMe = async (reload?: boolean) => {
     setUser(await me())
-  }, [setUser])
+    if (reload) refresh()
+  }
 
   useEffect(() => {
     getMe()
-  }, [getMe, token])
+  }, [token])
 
   const logout = useCallback(() => {
     Cookies.remove('refreshToken')
-    localStorage.clear()
-    setUser(undefined)
-  }, [setUser])
+    Cookies.remove('accessToken')
+    if (!!user) {
+      refresh()
+    }
+  }, [user])
 
   const provider: DataType = {
     user,

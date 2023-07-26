@@ -226,7 +226,7 @@ export default function Login() {
             onSubmit={(values, { setSubmitting }) => {
               setSubmitting(true)
               login(values)
-                .then(async () => await refetch())
+                .then(async () => await refetch(true))
                 .catch((v) => alert(v.response.data.message || 'Invalid user'))
                 .finally(() => {
                   setSubmitting(false)

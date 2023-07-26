@@ -113,17 +113,18 @@ function TablePaginationActions(props: TablePaginationActionsProps) {
   )
 }
 
-type TableProps = {
-  dataRow: any[]
+type TableProps<T extends object = any> = {
+  dataRow: T[]
   dataCols: {
-    field: string
+    field?: keyof T
     sub?: string
     name: string
     isNumber?: boolean
     items?: { itemValues: string[]; onChange: (v: string) => void }
+    custom?: (data: T, i: number) => ReactNode
   }[]
   isCheckboxEnabled?: boolean
-  rowIdentifierField: string
+  rowIdentifierField: keyof T
   page: number
   pageSize: number
   total: number
@@ -134,8 +135,8 @@ type TableProps = {
     event: React.MouseEvent<HTMLButtonElement> | null,
     newPage: number
   ) => void
-  onRowClick?: (data: any) => void
-  children:
+  onRowClick?: (data: T) => void
+  children?:
     | ((
         selected: any[],
         setSelected: Dispatch<SetStateAction<any[]>>
@@ -149,7 +150,6 @@ const SearchInputField = ({ onSearch }: { onSearch?: (v: string) => void }) => {
     <Flex
       p={10}
       alignItems={'end'}
-      width={'100%'}
       sx={{ gap: 10, alignItems: 'center', justifyContent: 'center' }}
     >
       <SearchableInput
@@ -167,7 +167,7 @@ const SearchInputField = ({ onSearch }: { onSearch?: (v: string) => void }) => {
   )
 }
 
-export function CustomTable({
+export function CustomTable<T extends object = any>({
   dataRow,
   dataCols,
   isCheckboxEnabled,
@@ -182,7 +182,7 @@ export function CustomTable({
   onSearch,
 
   children,
-}: TableProps & { onSearch?: (v: string) => void; isFetching?: boolean }) {
+}: TableProps<T> & { onSearch?: (v: string) => void; isFetching?: boolean }) {
   const [selected, setSelected] = useState<any[]>([])
 
   const handleSelectAllClick = useCallback(
@@ -213,7 +213,7 @@ export function CustomTable({
         : children}
       <SearchInputField onSearch={onSearch} />
       <Table
-        sx={{ minWidth: 500, position: 'relative' }}
+        sx={{ minWidth: 500, position: 'relative', maxHeight: 100 }}
         aria-label="custom pagination table"
         stickyHeader={true}
       >
@@ -237,7 +237,7 @@ export function CustomTable({
             )}
             {dataCols.map((head) => (
               <TableCell
-                key={head.field}
+                key={head.field as string}
                 align={head.isNumber ? 'right' : 'left'}
               >
                 {!!head.items ? (
@@ -310,22 +310,27 @@ export function CustomTable({
                   component="th"
                   scope="row"
                   onClick={() => onRowClick?.(row)}
-                  sx={{ width: d.field === 'id' ? 320 : undefined }}
+                  sx={{ width: d?.field === 'id' ? 320 : undefined }}
                 >
-                  {!!d.sub
-                    ? d.sub === 'date'
-                      ? !!row[d.field]?.[d.sub]
+                  {!!d.field
+                    ? !!d.sub
+                      ? d.sub === 'date'
+                        ? !!(row[d.field] as any)?.[d.sub]
+                          ? format(
+                              new Date((row[d.field] as any)?.[d.sub]),
+                              'cccc LLLL d, yyyy'
+                            )
+                          : null
+                        : (row[d.field] as any)?.[d.sub]
+                      : d.field === 'date'
+                      ? !!row[d.field]
                         ? format(
-                            new Date(row[d.field]?.[d.sub]),
+                            new Date(row[d.field] as any),
                             'cccc LLLL d, yyyy'
                           )
                         : null
-                      : row[d.field]?.[d.sub]
-                    : d.field === 'date'
-                    ? !!row[d.field]
-                      ? format(new Date(row[d.field]), 'cccc LLLL d, yyyy')
-                      : null
-                    : row[d.field]}
+                      : row[d.field]
+                    : d?.custom?.(dataRow[i], i)}
                 </TableCell>
               ))}
             </TableRow>

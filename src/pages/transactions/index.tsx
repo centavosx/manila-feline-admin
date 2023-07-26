@@ -1,19 +1,21 @@
-import React, { useCallback, useEffect, useState } from 'react'
-import { Flex, Image } from 'rebass'
+import React, { memo, useCallback, useEffect, useState } from 'react'
+import { Flex, Image, Text } from 'rebass'
 
 import { Section } from '../../components/sections'
 
 import { Response as ResponseDto } from 'dto'
 
-import { deleteRole, getAllUser, getUser, updateRole } from 'api'
 import { CustomTable } from 'components/table'
 import { NextPage } from 'next'
 import { useApi } from 'hooks'
 import { useRouter } from 'next/router'
 
-import { Roles } from 'entities'
-import { ConfirmationModal, ModalFlexProps } from 'components/modal'
-import { checkId, FormikValidation } from 'helpers'
+import { ConfirmationModal } from 'components/modal'
+import { checkId } from 'helpers'
+import { deleteService } from 'api/service.api'
+
+import { getAllTransaction } from 'api'
+import { format } from 'date-fns'
 
 type PageProps = NextPage & {
   limitParams: number
@@ -21,34 +23,41 @@ type PageProps = NextPage & {
   searchParams?: string
 }
 
-export default function Users({
+type Transactiontype = {
+  refId: string
+
+  userId: string
+
+  created: string
+}
+
+export default function Transactions({
   limitParams,
   pageParams,
   searchParams,
 }: PageProps) {
-  const { push } = useRouter()
-
   const {
     data: dat,
-    refetch,
     isFetching,
+    refetch,
   } = useApi(
     async () =>
-      await getAllUser(
+      await getAllTransaction(
         pageParams,
         limitParams,
         !!searchParams
           ? checkId(searchParams)
             ? {
-                role: Roles.USER,
                 id: searchParams,
               }
-            : { role: Roles.USER, search: searchParams }
-          : { role: Roles.USER }
+            : {
+                search: searchParams,
+              }
+          : {}
       )
   )
-  const { replace, query, pathname } = useRouter()
-  const data: ResponseDto = dat ?? { data: [], total: 0 }
+  const { replace, query, pathname, push } = useRouter()
+  const data: ResponseDto = dat ?? { data: [] as Transactiontype[], total: 0 }
 
   useEffect(() => {
     refetch()
@@ -57,37 +66,38 @@ export default function Users({
   return (
     <Flex flexDirection={'column'} alignItems="center" width={'100%'}>
       <Section
-        title="Users"
+        title="Transactions"
         textProps={{ textAlign: 'start' }}
         isFetching={isFetching}
       >
         <CustomTable
-          isCheckboxEnabled={true}
+          isCheckboxEnabled={false}
           dataCols={[
-            { field: 'id', name: 'ID' },
             {
-              field: 'name',
-              name: 'Name',
+              name: 'Transaction Id',
+              field: 'refId',
             },
             {
-              field: 'email',
-              name: 'Email',
+              name: 'User',
+              field: 'userId',
+            },
+            {
+              name: 'Created',
+              custom: (v) => {
+                return (
+                  <>
+                    {format(new Date(v.created), `yyyy-MM-dd hh:mm aaaaa'm'`)}
+                  </>
+                )
+              },
             },
           ]}
-          dataRow={data?.data ?? []}
+          onRowClick={(v) => push('/transactions/' + v.refId)}
+          dataRow={(data.data ?? []) as Transactiontype[]}
           page={pageParams}
           pageSize={limitParams}
           total={data?.total ?? 0}
-          rowIdentifierField={'id'}
-          onRowClick={(v) =>
-            push({
-              pathname: '/users/' + v.id,
-              query: {
-                name: v.name,
-                email: v.email,
-              },
-            })
-          }
+          rowIdentifierField={'refId'}
           handleChangePage={(_, p) => {
             replace({
               pathname,
@@ -119,12 +129,17 @@ export default function Users({
           }
         >
           {(selected, setSelected) => (
-            <ConfirmationModal
+            <ConfirmationModal<{
+              id: string
+              name: string
+              description: string
+            }>
+              modalText="Assign Admin"
               selected={selected}
               setSelected={setSelected}
               refetch={refetch}
               onRemove={async () => {
-                await deleteRole({ ids: selected }, Roles.USER)
+                await deleteService({ ids: selected })
               }}
             />
           )}
