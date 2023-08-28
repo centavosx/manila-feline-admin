@@ -188,7 +188,7 @@ const DatePick: React.FC<{
 
     while (start < end) {
       const startDay = addHours(startOfDay(start), 9)
-      const endDay = addHours(startDay, 11)
+      const endDay = addHours(startDay, 12)
       const time: string[] = []
       while (startDay < endDay) {
         const timeFormat = format(startDay, 'yyyy-MM-dd HH')
