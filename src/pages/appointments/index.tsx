@@ -39,6 +39,7 @@ import {
   format,
   startOfDay,
   startOfMonth,
+  addHours,
 } from 'date-fns'
 
 type PageProps = NextPage & {
@@ -186,8 +187,8 @@ const DatePick: React.FC<{
     const dates: string[][] = []
 
     while (start < end) {
-      const startDay = startOfDay(start)
-      const endDay = endOfDay(start)
+      const startDay = addHours(startOfDay(start), 9)
+      const endDay = addHours(startDay, 11)
       const time: string[] = []
       while (startDay < endDay) {
         const timeFormat = format(startDay, 'yyyy-MM-dd HH')
