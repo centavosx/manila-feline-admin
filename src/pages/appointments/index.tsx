@@ -206,10 +206,15 @@ const DatePick: React.FC<{
 
   const currentDateTime = availableDates[date.getDate() - 1]
 
-  const timeLabelAndValue = currentDateTime.map((v, i) => ({
-    label: v,
-    value: v.split(':')[0],
-  }))
+  const timeLabelAndValue = currentDateTime.map((v, i) => {
+    const hour = Number(v.split(':')[0])
+    const isAm = !(v.split(' ')[1] === 'pm')
+
+    return {
+      label: v,
+      value: (isAm ? hour : (hour === 12 ? 0 : hour) + 12).toString(),
+    }
+  })
 
   return (
     <>

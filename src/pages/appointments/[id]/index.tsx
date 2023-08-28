@@ -47,6 +47,7 @@ const DateAndTime = ({
   onChange,
   isEdit,
   children,
+  selected,
 }: {
   date: Date
   onChange: (date: Date) => void
@@ -57,6 +58,7 @@ const DateAndTime = ({
       value: string
     }[]
   ) => ReactNode
+  selected: number
 }) => {
   const { isFetching, data, refetch } = useApi(
     async () =>
@@ -84,7 +86,10 @@ const DateAndTime = ({
       const time: string[] = []
       while (startDay < endDay) {
         const timeFormat = format(startDay, 'yyyy-MM-dd HH')
-        if (!parsedDate.includes(timeFormat)) {
+        if (
+          !parsedDate.includes(timeFormat) ||
+          startDay.getHours() === selected
+        ) {
           time.push(format(startDay, "hh:mm aaaaa'm'"))
         }
         startDay.setHours(startDay.getHours() + 1)
@@ -94,14 +99,19 @@ const DateAndTime = ({
     }
 
     return dates
-  }, [data, date])
+  }, [data, date, selected])
 
   const currentDateTime = availableDates[date.getDate() - 1]
 
-  const timeLabelAndValue = currentDateTime.map((v, i) => ({
-    label: v,
-    value: v.split(':')[0],
-  }))
+  const timeLabelAndValue = currentDateTime.map((v, i) => {
+    const hour = Number(v.split(':')[0])
+    const isAm = !(v.split(' ')[1] === 'pm')
+
+    return {
+      label: v,
+      value: (isAm ? hour : (hour === 12 ? 0 : hour) + 12).toString(),
+    }
+  })
 
   return (
     <>
@@ -255,6 +265,7 @@ export default function AppointmentInformation({ id }: { id: string }) {
                             date: new Date(d).getTime(),
                           })
                         }}
+                        selected={values.time || 0}
                         isEdit={edit}
                       >
                         {(timeLabelAndValue) => (
