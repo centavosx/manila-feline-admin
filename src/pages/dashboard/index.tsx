@@ -169,6 +169,7 @@ export default function Dashboard({ date }: DashboardProps) {
         }}
       >
         <Calendar
+          locale="en-US"
           value={!!date ? new Date(date) : new Date()}
           onChange={(v: any) =>
             replace({

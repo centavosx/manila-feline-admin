@@ -26,6 +26,7 @@ import {
   endOfMonth,
   format,
   startOfDay,
+  addHours,
   startOfMonth,
 } from 'date-fns'
 
@@ -78,8 +79,8 @@ const DateAndTime = ({
     const dates: string[][] = []
 
     while (start < end) {
-      const startDay = startOfDay(start)
-      const endDay = endOfDay(start)
+      const startDay = addHours(startOfDay(start), 9)
+      const endDay = addHours(startDay, 12)
       const time: string[] = []
       while (startDay < endDay) {
         const timeFormat = format(startDay, 'yyyy-MM-dd HH')
