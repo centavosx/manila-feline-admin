@@ -17,6 +17,7 @@ import { MobileView, WebView } from '../views'
 import { BaseHead } from '../basehead'
 import { useRouter } from 'next/router'
 import { FiMenu } from 'react-icons/fi'
+import { Chat } from 'components/chat'
 
 const SideNav = ({
   isLink,
@@ -144,8 +145,12 @@ export const Main = ({
           backgroundColor={'lightgrey'}
         >
           {pathname !== '/' && pathname !== '/reset' && (
-            <SideNav isLink={isLink} refCurrent={refValue} />
+            <>
+              <SideNav isLink={isLink} refCurrent={refValue} />
+              <Chat />
+            </>
           )}
+
           <Flex
             ref={ref}
             flex={1}

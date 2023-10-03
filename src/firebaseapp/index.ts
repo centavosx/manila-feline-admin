@@ -133,7 +133,6 @@ abstract class FirebaseBody<
       await addDoc(collection(db, this.db), {
         user: this.id,
         ...data,
-        read: false,
         created: Timestamp.now().toMillis(),
       })
     } catch (e) {
@@ -157,9 +156,9 @@ abstract class FirebaseBody<
     })
   }
 
-  public async getData(lim: number | undefined = 20) {
+  public async getData(lim: number | undefined = 50) {
     try {
-      const l = lim ?? 20
+      const l = lim
       let q = !this.lastPage
         ? query(
             collection(db, this.db),
@@ -176,7 +175,6 @@ abstract class FirebaseBody<
       const snapshot = await getDocs(q)
 
       this.lastPage = snapshot
-      console.log(q)
       const value: (V & DateAndRef)[] = []
       snapshot.forEach((v) => {
         value.push({ ...(v.data() as any), refId: v.id })
@@ -197,8 +195,8 @@ export class FirebaseAdminRealtimeMessaging<
   T extends Record<string, any> = Record<string, any>,
   V extends Record<string, any> = Record<string, any>
 > extends FirebaseBody<T, V> {
-  constructor(id: string) {
-    super(id, 'users', [undefined, orderBy('chatModified', 'desc')])
+  constructor() {
+    super('', 'users', [undefined, orderBy('chatModified', 'desc')])
   }
 
   public async readData(id?: string | undefined): Promise<void> {
@@ -240,7 +238,6 @@ export class FirebaseRealtimeMessaging<
         transaction.set(doc(db, this.db, newDoc.id), {
           user: this.id,
           ...data,
-          read: false,
           created: Timestamp.now().toMillis(),
         })
 
@@ -259,7 +256,6 @@ export class FirebaseRealtimeMessaging<
             transaction.set(doc(db, 'users', newUser.id), {
               id: this.id,
               lastMessage: data.message,
-              read: this.id !== data.from,
               chatModified: Timestamp.now().toMillis(),
             })
             return
@@ -273,7 +269,6 @@ export class FirebaseRealtimeMessaging<
         const ref = doc(db, 'users', this.refId!)
         transaction.update(ref, {
           lastMessage: data.message,
-          read: this.id !== data.from,
           chatModified: Timestamp.now().toMillis(),
         })
       })
